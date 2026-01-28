@@ -3,98 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT. UNIMITRA - Cloud System</title>
-
+    <title>PT. UNIMITRA - Monitoring System</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
-        .login-card { padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 300px; }
-        input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:1000; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
-    <div class="login-card">
+    <div style="padding: 30px; border: 1px solid #eee; text-align: center; width: 300px;">
         <h2>UNIMITRA CLOUD</h2>
-        <input type="email" id="email" placeholder="Email (Contoh: admin@mail.com)">
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="login()">MASUK</button>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue; text-decoration:none; font-weight:bold;">Daftar Disini</a>
-        </p>
+        <p style="font-size: 12px; margin-top: 15px;">Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue;">Daftar Disini</a></p>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
-    <div class="header">
-        <h1>PT. UNIMITRA KHARISMA</h1>
-        <button onclick="logout()" style="width:auto; background:#dc3545;">Logout</button>
+    <h1>PT. UNIMITRA KHARISMA</h1>
+    <div class="container">
+        <h3>Input Data & Keterangan</h3>
+        <input type="text" id="model" placeholder="Model">
+        <input type="text" id="vendor" placeholder="Vendor">
+        <input type="text" id="season" placeholder="Season (Contoh: S1)">
+        <textarea id="keterangan" placeholder="Isi Keterangan..."></textarea>
+        <button onclick="simpanData()" style="background:#28a745;">SIMPAN KE CLOUD</button>
     </div>
 
     <div class="container">
-        <h3>Form Input Data (Internet Sync)</h3>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="model" placeholder="Model">
-            <input type="text" id="vendor" placeholder="Vendor">
-            <input type="text" id="season" placeholder="Season">
-        </div>
-        <button onclick="simpanData()" style="background:#28a745;">SIMPAN KE CLOUD</button>
+        <h3>Grafik Statistik Season</h3>
+        <canvas id="seasonChart"></canvas>
+    </div>
 
-        <hr style="margin: 30px 0;">
-        <input type="text" id="searchInput" placeholder="Cari data..." onkeyup="cariData()" style="width:300px;">
-
+    <div class="container">
         <table>
-            <thead>
-                <tr>
-                    <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Aksi</th>
-                </tr>
-            </thead>
+            <thead><tr><th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th></tr></thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Konfigurasi dari gambar yang Anda kirim
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
         projectId: "umk-monitoring",
         storageBucket: "umk-monitoring.firebasestorage.app",
         messagingSenderId: "483335867373",
-        appId: "1:483335867373:web:5d4c8d3ec97328374835e4",
-        measurementId: "G-BRKJ2HQN7E"
+        appId: "1:483335867373:web:5d4c8d3ec97328374835e4"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    let myChart = null;
 
-    function login() {
-        const e = document.getElementById("email").value;
-        const p = document.getElementById("pass").value;
-        auth.signInWithEmailAndPassword(e, p).catch(err => alert("Email/Password salah atau belum terdaftar"));
-    }
-
-    function daftar() {
-        const e = document.getElementById("email").value;
-        const p = document.getElementById("pass").value;
-        if(!e || !p) return alert("Isi email dan password!");
-        auth.createUserWithEmailAndPassword(e, p)
-            .then(() => alert("Berhasil Daftar! Sekarang silakan klik MASUK"))
-            .catch(err => alert("Gagal: " + err.message));
-    }
+    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert(err.message)); }
+    function daftar() { auth.createUserWithEmailAndPassword(email.value, pass.value).then(() => alert("Berhasil!")).catch(err => alert(err.message)); }
 
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -104,48 +80,37 @@
         }
     });
 
-    function logout() { auth.signOut().then(() => location.reload()); }
-
     function simpanData() {
-        const m = document.getElementById("model").value;
-        const v = document.getElementById("vendor").value;
-        const s = document.getElementById("season").value;
-        if(!m || !v) return alert("Isi Model & Vendor!");
-
-        db.collection("data_monitoring").add({
-            model: m, vendor: v, season: s,
+        db.collection("monitoring_unimitra").add({
+            model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            alert("Tersimpan!");
-            document.getElementById("model").value = "";
-            document.getElementById("vendor").value = "";
-            document.getElementById("season").value = "";
-        });
+        }).then(() => { alert("Tersimpan!"); location.reload(); });
     }
 
     function muatData() {
-        db.collection("data_monitoring").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = ""; let i = 1;
-            snapshot.forEach(doc => {
+        db.collection("monitoring_unimitra").orderBy("waktu", "desc").onSnapshot(snap => {
+            let html = ""; let i = 1; let stats = {};
+            snap.forEach(doc => {
                 let d = doc.data();
-                html += `<tr>
-                    <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td>
-                    <td><button onclick="hapus('${doc.id}')" style="background:red; width:auto; padding:5px;">Hapus</button></td>
-                </tr>`;
+                stats[d.season] = (stats[d.season] || 0) + 1;
+                html += `<tr><td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
+                <td><button onclick="hapus('${doc.id}')" style="background:red; width:auto; padding:5px;">Hapus</button></td></tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
+            updateChart(stats);
         });
     }
 
-    function hapus(id) { if(confirm("Hapus?")) db.collection("data_monitoring").doc(id).delete(); }
-
-    function cariData() {
-        let val = document.getElementById("searchInput").value.toLowerCase();
-        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-        for (let row of rows) {
-            row.style.display = row.textContent.toLowerCase().includes(val) ? "" : "none";
-        }
+    function updateChart(stats) {
+        const ctx = document.getElementById('seasonChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: Object.keys(stats), datasets: [{ label: 'Jumlah per Season', data: Object.values(stats), backgroundColor: '#1a73e8' }] }
+        });
     }
+
+    function hapus(id) { if(confirm("Hapus?")) db.collection("monitoring_unimitra").doc(id).delete(); }
 </script>
 </body>
 </html>
