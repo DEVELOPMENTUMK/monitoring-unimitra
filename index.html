@@ -13,44 +13,51 @@
 
     <style>
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* LOGIN MEWAH */
+        /* LOGIN OVERLAY */
         #loginOverlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
             background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
             display:flex; justify-content:center; align-items:center; z-index:2000; 
         }
-        .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
+        .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
 
-        /* LAYOUT UTAMA */
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; }
-        .main-container { padding: 20px; max-width: 1200px; margin: auto; }
-        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .form-side { width: 380px; }
-        .chart-side { flex: 1; min-width: 300px; }
+        /* MAIN LAYOUT */
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .main-container { padding: 20px; max-width: 1250px; margin: auto; }
+        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
+        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        /* FORM INPUT (LEBAR ~5CM / 400PX) */
+        .form-side { width: 400px; }
+        .chart-side { flex: 1; min-width: 320px; }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
         textarea { height: 50px; resize: none; }
 
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-        .btn-save { background: var(--success); color: white; width: 100%; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 5px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
 
-        .search-container { margin-bottom: 15px; }
-        .search-input { width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+        /* SEARCH BAR */
+        .search-container { margin-bottom: 10px; }
+        .search-input { width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+        .search-input:focus { border-color: var(--primary); }
 
+        /* TABLE */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        th { background: #f8fafc; color: #64748b; text-transform: uppercase; font-size: 11px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
 
         @media print {
             .header, .form-side, .btn-tool, #loginOverlay, .search-container, td:last-child, th:last-child { display: none !important; }
-            .card { border: none; box-shadow: none; }
+            .card { border: none; box-shadow: none; width: 100%; }
+            .chart-side { width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -58,54 +65,50 @@
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2 style="margin-bottom:0;">UNIMITRA</h2>
-        <p style="margin-top:5px;">Cloud Monitoring System</p>
+        <h2 style="margin:0;">UNIMITRA</h2>
+        <p style="margin-top:5px; font-size: 13px; color:#64748b;">Monitoring Cloud System</p>
         
         <input type="text" id="userInput" placeholder="Username">
-        <input type="password" id="passInput" placeholder="Password">
+        <input type="password" id="passInput" placeholder="Password (Min. 6 Karakter)">
         
-        <button onclick="login()" class="btn-login">Sign In</button>
-        
-        <div style="margin-top: 20px; font-size: 12px;">
-            Belum punya Username? <br>
-            <span onclick="daftar()" style="color:var(--primary); cursor:pointer; font-weight:bold; text-decoration:underline;">Klik Daftar Disini</span>
-        </div>
+        <button onclick="login()" class="btn-login">SIGN IN</button>
+        <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
-        <h2 style="margin:0; font-size: 18px;">PT. UNIMITRA KHARISMA</h2>
+        <h2 style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
         <div style="display:flex; align-items:center; gap:15px;">
-            <span id="userDisplay" style="font-size:13px; color:#64748b;"></span>
-            <button onclick="logout()" class="btn" style="background:#f1f5f9;">Sign Out</button>
+            <span id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></span>
+            <button onclick="logout()" class="btn" style="background:#f1f5f9; color:#64748b;">Logout</button>
         </div>
     </div>
 
     <div class="main-container">
         <div class="flex-row">
             <div class="card form-side">
-                <h3 style="margin-top:0; font-size: 15px;">Input Data</h3>
+                <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
                 <input type="hidden" id="editId">
                 <div class="input-grid">
                     <input type="text" id="model" placeholder="Model">
                     <input type="text" id="vendor" placeholder="Vendor">
                     <input type="text" id="season" placeholder="Season">
                 </div>
-                <textarea id="keterangan" placeholder="Keterangan..."></textarea>
-                <button onclick="simpanData()" id="btnAction" class="btn btn-save" style="margin-top:10px;">SIMPAN DATA</button>
+                <textarea id="keterangan" placeholder="Catatan Keterangan..."></textarea>
+                <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
             </div>
 
             <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor</h3>
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik Vendor</h3>
                 <canvas id="vendorChart" style="max-height: 180px;"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Data..." onkeyup="cariData()">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Model, Vendor, atau Season..." onkeyup="cariData()">
                 </div>
                 <div>
                     <button onclick="window.print()" class="btn btn-tool">Print Report</button>
@@ -113,19 +116,22 @@
                 </div>
             </div>
             
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <div style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    // FIREBASE CONFIGURATION
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
@@ -140,24 +146,21 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    // LOGIKA USERNAME KE EMAIL (DIBALIK LAYAR)
-    function formatEmail(user) { return user.toLowerCase().trim() + "@unimitra.com"; }
+    // AUTH FUNCTIONS (USERNAME TO EMAIL)
+    const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
 
     function login() { 
-        const email = formatEmail(document.getElementById("userInput").value);
-        const pass = document.getElementById("passInput").value;
-        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Username atau Password Salah!")); 
+        const u = userInput.value; const p = passInput.value;
+        if(!u || !p) return alert("Isi Username & Password!");
+        auth.signInWithEmailAndPassword(formatEmail(u), p).catch(() => alert("Username/Password Salah!")); 
     }
     
     function daftar() {
-        const user = document.getElementById("userInput").value;
-        const pass = document.getElementById("passInput").value;
-        if(!user || !pass) return alert("Isi Username dan Password!");
-        
-        const email = formatEmail(user);
-        auth.createUserWithEmailAndPassword(email, pass)
-            .then(() => alert("Berhasil Terdaftar sebagai: " + user))
-            .catch(err => alert("Gagal Daftar: " + err.message));
+        const u = userInput.value; const p = passInput.value;
+        if(!u || p.length < 6) return alert("Isi Username & Password (Min. 6 karakter)!");
+        auth.createUserWithEmailAndPassword(formatEmail(u), p)
+            .then(() => alert("Berhasil Terdaftar! Silakan Klik Sign In."))
+            .catch(err => alert("Error: " + err.message));
     }
 
     function logout() { auth.signOut().then(() => location.reload()); }
@@ -166,19 +169,25 @@
         if (user) {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("mainContent").style.display = "block";
-            document.getElementById("userDisplay").innerText = "User: " + user.email.split('@')[0];
+            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
             muatData();
         }
     });
 
+    // DATA FUNCTIONS
     async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = {
             model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         };
-        if(!model.value || !vendor.value) return alert("Lengkapi data!");
-        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
+        if(!model.value || !vendor.value) return alert("Model & Vendor wajib diisi!");
+
+        if (id) {
+            await db.collection("data_unimitra").doc(id).update(data);
+        } else {
+            await db.collection("data_unimitra").add(data);
+        }
         resetForm();
     }
 
@@ -187,14 +196,6 @@
         model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
         document.getElementById("btnAction").innerText = "SIMPAN DATA";
         document.getElementById("btnAction").style.background = "#16a34a";
-    }
-
-    function cariData() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-        for (let row of rows) {
-            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
-        }
     }
 
     function muatData() {
@@ -206,8 +207,8 @@
                 html += `<tr>
                     <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
                     <td>
-                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
-                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span>
+                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}')" style="color:var(--warning); cursor:pointer; font-weight:bold; font-size:12px;">Edit</span>
+                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; font-size:12px; margin-left:12px;">Hapus</span>
                     </td>
                 </tr>`;
             });
@@ -223,7 +224,7 @@
             type: 'bar',
             data: {
                 labels: Object.keys(data),
-                datasets: [{ label: 'Total Input', data: Object.values(data), backgroundColor: '#2563eb', borderRadius: 4 }]
+                datasets: [{ label: 'Total Model', data: Object.values(data), backgroundColor: '#2563eb', borderRadius: 4 }]
             },
             options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
@@ -237,7 +238,15 @@
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function hapus(id) { if(confirm("Hapus data?")) db.collection("data_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus data ini?")) db.collection("data_unimitra").doc(id).delete(); }
+
+    function cariData() {
+        let val = searchInput.value.toLowerCase();
+        let rows = tableBody.getElementsByTagName("tr");
+        for (let row of rows) {
+            row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
+        }
+    }
 
     function downloadExcel() {
         const table = document.getElementById("dataTable");
