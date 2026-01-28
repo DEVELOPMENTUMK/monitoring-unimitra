@@ -3,52 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT. UNIMITRA - Monitoring System</title>
+    <title>PT. UNIMITRA - Cloud System</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:1000; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
+        .login-card { padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 300px; }
+        
+        /* Layout Input Ringkas */
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input { flex: 1; min-width: 150px; }
+        textarea { width: 100%; height: 60px; resize: vertical; }
+        
+        button { padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
+        
+        /* Tabel & Grafik */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; }
+        th { background-color: #f8f9fa; }
+        
+        /* Ukuran Grafik Kecil */
+        .chart-wrapper { max-width: 500px; margin: 0 auto; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
-    <div style="padding: 30px; border: 1px solid #eee; text-align: center; width: 300px;">
+    <div class="login-card">
         <h2>UNIMITRA CLOUD</h2>
         <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="login()">MASUK</button>
-        <p style="font-size: 12px; margin-top: 15px;">Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue;">Daftar Disini</a></p>
+        <input type="password" id="pass" placeholder="Password" style="width:100%;">
+        <button onclick="login()" style="width:100%; margin-top:10px;">MASUK</button>
+        <p style="font-size: 12px; margin-top: 15px;">Belum punya akun? <span style="color:blue; cursor:pointer" onclick="daftar()">Daftar Disini</span></p>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
-    <h1>PT. UNIMITRA KHARISMA</h1>
-    <div class="container">
-        <h3>Input Data & Keterangan</h3>
-        <input type="text" id="model" placeholder="Model">
-        <input type="text" id="vendor" placeholder="Vendor">
-        <input type="text" id="season" placeholder="Season (Contoh: S1)">
-        <textarea id="keterangan" placeholder="Isi Keterangan..."></textarea>
-        <button onclick="simpanData()" style="background:#28a745;">SIMPAN KE CLOUD</button>
+    <div class="header">
+        <h1 style="font-size: 20px;">PT. UNIMITRA KHARISMA</h1>
+        <button onclick="logout()" style="background:#dc3545;">Logout</button>
     </div>
 
     <div class="container">
-        <h3>Grafik Statistik Season</h3>
-        <canvas id="seasonChart"></canvas>
+        <h3>Form Input Data</h3>
+        <div class="input-group">
+            <input type="text" id="model" placeholder="Model">
+            <input type="text" id="vendor" placeholder="Vendor">
+            <input type="text" id="season" placeholder="Season">
+        </div>
+        <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
+        <button onclick="simpanData()" style="background:#28a745; width: 100%;">SIMPAN KE CLOUD</button>
     </div>
 
     <div class="container">
+        <h3 style="text-align: center;">Statistik Season</h3>
+        <div class="chart-wrapper">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <div class="container" style="overflow-x: auto;">
         <table>
-            <thead><tr><th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
+                </tr>
+            </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
@@ -67,10 +95,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
-    let myChart = null;
+    let chartInstance = null;
 
     function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert(err.message)); }
     function daftar() { auth.createUserWithEmailAndPassword(email.value, pass.value).then(() => alert("Berhasil!")).catch(err => alert(err.message)); }
+    function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -81,36 +110,53 @@
     });
 
     function simpanData() {
-        db.collection("monitoring_unimitra").add({
-            model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
+        if(!model.value || !vendor.value) return alert("Isi Model & Vendor!");
+        db.collection("data_unimitra").add({
+            model: model.value,
+            vendor: vendor.value,
+            season: season.value,
+            keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => { alert("Tersimpan!"); location.reload(); });
+        }).then(() => {
+            alert("Data tersimpan!");
+            model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
+        });
     }
 
     function muatData() {
-        db.collection("monitoring_unimitra").orderBy("waktu", "desc").onSnapshot(snap => {
-            let html = ""; let i = 1; let stats = {};
-            snap.forEach(doc => {
+        db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
+            let html = ""; let i = 1; let counts = {};
+            snapshot.forEach(doc => {
                 let d = doc.data();
-                stats[d.season] = (stats[d.season] || 0) + 1;
-                html += `<tr><td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
-                <td><button onclick="hapus('${doc.id}')" style="background:red; width:auto; padding:5px;">Hapus</button></td></tr>`;
+                counts[d.season] = (counts[d.season] || 0) + 1;
+                html += `<tr>
+                    <td>${i++}</td>
+                    <td>${d.model}</td>
+                    <td>${d.vendor}</td>
+                    <td>${d.season}</td>
+                    <td>${d.keterangan || '-'}</td>
+                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:5px; font-size:12px;">Hapus</button></td>
+                </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
-            updateChart(stats);
+            renderChart(counts);
         });
     }
 
-    function updateChart(stats) {
-        const ctx = document.getElementById('seasonChart').getContext('2d');
-        if(myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
+    function renderChart(data) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
             type: 'bar',
-            data: { labels: Object.keys(stats), datasets: [{ label: 'Jumlah per Season', data: Object.values(stats), backgroundColor: '#1a73e8' }] }
+            data: {
+                labels: Object.keys(data),
+                datasets: [{ label: 'Jumlah per Season', data: Object.values(data), backgroundColor: '#1a73e8' }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
         });
     }
 
-    function hapus(id) { if(confirm("Hapus?")) db.collection("monitoring_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus data?")) db.collection("data_unimitra").doc(id).delete(); }
 </script>
 </body>
 </html>
