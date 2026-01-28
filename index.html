@@ -15,7 +15,6 @@
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* LOGIN OVERLAY */
         #loginOverlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
             background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
@@ -26,13 +25,11 @@
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
 
-        /* MAIN LAYOUT */
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .main-container { padding: 20px; max-width: 1250px; margin: auto; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
         .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
-        /* FORM INPUT (LEBAR ~5CM / 400PX) */
         .form-side { width: 400px; }
         .chart-side { flex: 1; min-width: 320px; }
         
@@ -44,12 +41,9 @@
         .btn-save { background: var(--success); color: white; width: 100%; margin-top: 5px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
 
-        /* SEARCH BAR */
         .search-container { margin-bottom: 10px; }
         .search-input { width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
-        .search-input:focus { border-color: var(--primary); }
 
-        /* TABLE */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
@@ -57,7 +51,6 @@
         @media print {
             .header, .form-side, .btn-tool, #loginOverlay, .search-container, td:last-child, th:last-child { display: none !important; }
             .card { border: none; box-shadow: none; width: 100%; }
-            .chart-side { width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -65,12 +58,10 @@
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2 style="margin:0;">PT.UNIMITRA KHARISMA</h2>
-        <p style="margin-top:5px; font-size: 13px; color:#64748b;">Development Monitoring System</p>
-        
+        <h2 style="margin:0;">UNIMITRA</h2>
+        <p style="margin-top:5px; font-size: 13px; color:#64748b;">Monitoring Cloud System</p>
         <input type="text" id="userInput" placeholder="Username">
-        <input type="password" id="passInput" placeholder="Password (Min. 6 Karakter)">
-        
+        <input type="password" id="passInput" placeholder="Password">
         <button onclick="login()" class="btn-login">SIGN IN</button>
         <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
@@ -95,43 +86,37 @@
                     <input type="text" id="vendor" placeholder="Vendor">
                     <input type="text" id="season" placeholder="Season">
                 </div>
-                <textarea id="keterangan" placeholder="Catatan Keterangan..."></textarea>
+                <textarea id="keterangan" placeholder="Keterangan..."></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
             </div>
 
             <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik Vendor</h3>
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor (%)</h3>
                 <canvas id="vendorChart" style="max-height: 180px;"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Model, Vendor, atau Season..." onkeyup="cariData()">
-                </div>
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Data..." onkeyup="cariData()">
                 <div>
                     <button onclick="window.print()" class="btn btn-tool">Print Report</button>
                     <button onclick="downloadExcel()" class="btn btn-tool" style="color: var(--success);">Export Excel</button>
                 </div>
             </div>
-            
-            <div style="overflow-x: auto;">
-                <table id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-    // FIREBASE CONFIGURATION
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
@@ -146,21 +131,16 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    // AUTH FUNCTIONS (USERNAME TO EMAIL)
     const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
 
     function login() { 
-        const u = userInput.value; const p = passInput.value;
-        if(!u || !p) return alert("Isi Username & Password!");
-        auth.signInWithEmailAndPassword(formatEmail(u), p).catch(() => alert("Username/Password Salah!")); 
+        auth.signInWithEmailAndPassword(formatEmail(userInput.value), passInput.value).catch(() => alert("Gagal Login!")); 
     }
     
     function daftar() {
-        const u = userInput.value; const p = passInput.value;
-        if(!u || p.length < 6) return alert("Isi Username & Password (Min. 6 karakter)!");
-        auth.createUserWithEmailAndPassword(formatEmail(u), p)
-            .then(() => alert("Berhasil Terdaftar! Silakan Klik Sign In."))
-            .catch(err => alert("Error: " + err.message));
+        if(passInput.value.length < 6) return alert("Password minimal 6 karakter!");
+        auth.createUserWithEmailAndPassword(formatEmail(userInput.value), passInput.value)
+            .then(() => alert("Berhasil Terdaftar! Klik SIGN IN.")).catch(err => alert(err.message));
     }
 
     function logout() { auth.signOut().then(() => location.reload()); }
@@ -174,20 +154,11 @@
         }
     });
 
-    // DATA FUNCTIONS
     async function simpanData() {
         const id = document.getElementById("editId").value;
-        const data = {
-            model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
-            waktu: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        if(!model.value || !vendor.value) return alert("Model & Vendor wajib diisi!");
-
-        if (id) {
-            await db.collection("data_unimitra").doc(id).update(data);
-        } else {
-            await db.collection("data_unimitra").add(data);
-        }
+        const data = { model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
+        if(!model.value || !vendor.value) return alert("Lengkapi Model & Vendor!");
+        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
         resetForm();
     }
 
@@ -200,33 +171,43 @@
 
     function muatData() {
         db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = ""; let i = 1; let vendorCounts = {};
+            let html = ""; let i = 1; let vendorCounts = {}; let total = 0;
             snapshot.forEach(doc => {
                 let d = doc.data();
                 vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
-                html += `<tr>
-                    <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
-                    <td>
-                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}')" style="color:var(--warning); cursor:pointer; font-weight:bold; font-size:12px;">Edit</span>
-                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; font-size:12px; margin-left:12px;">Hapus</span>
-                    </td>
-                </tr>`;
+                total++;
+                html += `<tr><td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td><td><span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span><span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span></td></tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
-            renderChart(vendorCounts);
+            renderChart(vendorCounts, total);
         });
     }
 
-    function renderChart(data) {
+    function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
+        
+        const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
+        const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
+
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: Object.keys(data),
-                datasets: [{ label: 'Total Model', data: Object.values(data), backgroundColor: '#2563eb', borderRadius: 4 }]
+                datasets: [{ label: 'Persentase (%)', data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), backgroundColor: backgroundColors, borderRadius: 4 }]
             },
-            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.raw}% dari total data`
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } }
+            }
         });
     }
 
@@ -238,22 +219,18 @@
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function hapus(id) { if(confirm("Hapus data ini?")) db.collection("data_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
 
     function cariData() {
         let val = searchInput.value.toLowerCase();
         let rows = tableBody.getElementsByTagName("tr");
-        for (let row of rows) {
-            row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
-        }
+        for (let row of rows) row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
     }
 
     function downloadExcel() {
-        const table = document.getElementById("dataTable");
-        const wb = XLSX.utils.table_to_book(table);
+        const wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
         XLSX.writeFile(wb, "Laporan_Unimitra.xlsx");
     }
 </script>
 </body>
 </html>
-
