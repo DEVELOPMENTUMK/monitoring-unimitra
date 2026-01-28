@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
     <style>
-        /* Tampilan tetap konsisten seperti keinginan Anda */
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
         .login-card { padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 300px; }
@@ -33,7 +32,9 @@
         <input type="email" id="email" placeholder="Email (Contoh: admin@mail.com)">
         <input type="password" id="pass" placeholder="Password">
         <button onclick="login()">MASUK</button>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">Belum punya akun? <span style="color:blue; cursor:pointer" onclick="daftar()">Daftar Disini</span></p>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+            Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue; cursor:pointer; text-decoration:none; font-weight:bold;">Daftar Disini</a>
+        </p>
     </div>
 </div>
 
@@ -70,18 +71,15 @@
 </div>
 
 <script>
-    // ************************************************************
-    // TEMPEL KODE firebaseConfig ANDA DI BAWAH INI:
-   const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "umk-monitoring-xxxx.firebaseapp.com",
-  projectId: "umk-monitoring-xxxx",
-  storageBucket: "umk-monitoring-xxxx.appspot.com",
-  messagingSenderId: "...",
-  appId: "..."
-};
+    // Konfigurasi Firebase Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "umk-monitoring-xxxx.firebaseapp.com",
+        projectId: "umk-monitoring-xxxx",
+        storageBucket: "umk-monitoring-xxxx.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
     };
-    // ************************************************************
 
     // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
@@ -90,42 +88,59 @@
 
     // Fungsi Login
     function login() {
-        auth.signInWithEmailAndPassword(email.value, pass.value)
+        const userEmail = document.getElementById("email").value;
+        const userPass = document.getElementById("pass").value;
+        auth.signInWithEmailAndPassword(userEmail, userPass)
             .catch(err => alert("Gagal Login: " + err.message));
     }
 
     // Fungsi Daftar
     function daftar() {
-        auth.createUserWithEmailAndPassword(email.value, pass.value)
-            .then(() => alert("Pendaftaran Berhasil!"))
+        const userEmail = document.getElementById("email").value;
+        const userPass = document.getElementById("pass").value;
+        if(!userEmail || !userPass) return alert("Isi email dan password untuk mendaftar!");
+        
+        auth.createUserWithEmailAndPassword(userEmail, userPass)
+            .then(() => alert("Pendaftaran Berhasil! Silakan klik MASUK."))
             .catch(err => alert("Gagal Daftar: " + err.message));
     }
 
-    // Cek Status Login
+    // Pantau Status Login
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("mainContent").style.display = "block";
             muatData();
+        } else {
+            document.getElementById("loginOverlay").style.display = "flex";
+            document.getElementById("mainContent").style.display = "none";
         }
     });
 
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    // Simpan ke Cloud
+    // Simpan ke Firestore
     function simpanData() {
+        const m = document.getElementById("model").value;
+        const v = document.getElementById("vendor").value;
+        const s = document.getElementById("season").value;
+
+        if(!m || !v) return alert("Model dan Vendor wajib diisi!");
+
         db.collection("data_monitoring").add({
-            model: model.value,
-            vendor: vendor.value,
-            season: season.value,
+            model: m,
+            vendor: v,
+            season: s,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             alert("Data tersimpan di Cloud!");
-            model.value = ""; vendor.value = ""; season.value = "";
-        });
+            document.getElementById("model").value = ""; 
+            document.getElementById("vendor").value = ""; 
+            document.getElementById("season").value = "";
+        }).catch(err => alert("Error simpan: " + err.message));
     }
 
-    // Ambil Data dari Cloud secara Real-time
+    // Muat Data Real-time
     function muatData() {
         db.collection("data_monitoring").orderBy("waktu", "desc").onSnapshot(snapshot => {
             let html = "";
@@ -137,7 +152,7 @@
                     <td>${d.model}</td>
                     <td>${d.vendor}</td>
                     <td>${d.season}</td>
-                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:5px;">Hapus</button></td>
+                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:5px; width:auto;">Hapus</button></td>
                 </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
@@ -145,7 +160,19 @@
     }
 
     function hapus(id) {
-        if(confirm("Hapus data ini dari internet?")) db.collection("data_monitoring").doc(id).delete();
+        if(confirm("Hapus data ini dari internet?")) {
+            db.collection("data_monitoring").doc(id).delete();
+        }
+    }
+
+    // Fungsi Cari
+    function cariData() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
+        for (let row of rows) {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        }
     }
 </script>
 </body>
