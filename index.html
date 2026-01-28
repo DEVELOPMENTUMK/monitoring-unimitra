@@ -13,15 +13,13 @@
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
         .login-card { padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 300px; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
         .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #f8f9fa; }
-        .search-container { margin-bottom: 15px; text-align: left; }
-        .search-container input { width: 300px; }
     </style>
 </head>
 <body>
@@ -33,7 +31,7 @@
         <input type="password" id="pass" placeholder="Password">
         <button onclick="login()">MASUK</button>
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue; cursor:pointer; text-decoration:none; font-weight:bold;">Daftar Disini</a>
+            Belum punya akun? <a href="javascript:void(0)" onclick="daftar()" style="color:blue; text-decoration:none; font-weight:bold;">Daftar Disini</a>
         </p>
     </div>
 </div>
@@ -54,10 +52,7 @@
         <button onclick="simpanData()" style="background:#28a745;">SIMPAN KE CLOUD</button>
 
         <hr style="margin: 30px 0;">
-
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Cari Model atau Vendor..." onkeyup="cariData()">
-        </div>
+        <input type="text" id="searchInput" placeholder="Cari data..." onkeyup="cariData()" style="width:300px;">
 
         <table>
             <thead>
@@ -71,107 +66,84 @@
 </div>
 
 <script>
-    // Konfigurasi Firebase Anda
+    // Konfigurasi dari gambar yang Anda kirim
     const firebaseConfig = {
-        apiKey: "AIzaSy...",
-        authDomain: "umk-monitoring-xxxx.firebaseapp.com",
-        projectId: "umk-monitoring-xxxx",
-        storageBucket: "umk-monitoring-xxxx.appspot.com",
-        messagingSenderId: "...",
-        appId: "..."
+        apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
+        authDomain: "umk-monitoring.firebaseapp.com",
+        projectId: "umk-monitoring",
+        storageBucket: "umk-monitoring.firebasestorage.app",
+        messagingSenderId: "483335867373",
+        appId: "1:483335867373:web:5d4c8d3ec97328374835e4",
+        measurementId: "G-BRKJ2HQN7E"
     };
 
-    // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Fungsi Login
     function login() {
-        const userEmail = document.getElementById("email").value;
-        const userPass = document.getElementById("pass").value;
-        auth.signInWithEmailAndPassword(userEmail, userPass)
-            .catch(err => alert("Gagal Login: " + err.message));
+        const e = document.getElementById("email").value;
+        const p = document.getElementById("pass").value;
+        auth.signInWithEmailAndPassword(e, p).catch(err => alert("Email/Password salah atau belum terdaftar"));
     }
 
-    // Fungsi Daftar
     function daftar() {
-        const userEmail = document.getElementById("email").value;
-        const userPass = document.getElementById("pass").value;
-        if(!userEmail || !userPass) return alert("Isi email dan password untuk mendaftar!");
-        
-        auth.createUserWithEmailAndPassword(userEmail, userPass)
-            .then(() => alert("Pendaftaran Berhasil! Silakan klik MASUK."))
-            .catch(err => alert("Gagal Daftar: " + err.message));
+        const e = document.getElementById("email").value;
+        const p = document.getElementById("pass").value;
+        if(!e || !p) return alert("Isi email dan password!");
+        auth.createUserWithEmailAndPassword(e, p)
+            .then(() => alert("Berhasil Daftar! Sekarang silakan klik MASUK"))
+            .catch(err => alert("Gagal: " + err.message));
     }
 
-    // Pantau Status Login
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("mainContent").style.display = "block";
             muatData();
-        } else {
-            document.getElementById("loginOverlay").style.display = "flex";
-            document.getElementById("mainContent").style.display = "none";
         }
     });
 
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    // Simpan ke Firestore
     function simpanData() {
         const m = document.getElementById("model").value;
         const v = document.getElementById("vendor").value;
         const s = document.getElementById("season").value;
-
-        if(!m || !v) return alert("Model dan Vendor wajib diisi!");
+        if(!m || !v) return alert("Isi Model & Vendor!");
 
         db.collection("data_monitoring").add({
-            model: m,
-            vendor: v,
-            season: s,
+            model: m, vendor: v, season: s,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
-            alert("Data tersimpan di Cloud!");
-            document.getElementById("model").value = ""; 
-            document.getElementById("vendor").value = ""; 
+            alert("Tersimpan!");
+            document.getElementById("model").value = "";
+            document.getElementById("vendor").value = "";
             document.getElementById("season").value = "";
-        }).catch(err => alert("Error simpan: " + err.message));
+        });
     }
 
-    // Muat Data Real-time
     function muatData() {
         db.collection("data_monitoring").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = "";
-            let i = 1;
+            let html = ""; let i = 1;
             snapshot.forEach(doc => {
                 let d = doc.data();
                 html += `<tr>
-                    <td>${i++}</td>
-                    <td>${d.model}</td>
-                    <td>${d.vendor}</td>
-                    <td>${d.season}</td>
-                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:5px; width:auto;">Hapus</button></td>
+                    <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td>
+                    <td><button onclick="hapus('${doc.id}')" style="background:red; width:auto; padding:5px;">Hapus</button></td>
                 </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
         });
     }
 
-    function hapus(id) {
-        if(confirm("Hapus data ini dari internet?")) {
-            db.collection("data_monitoring").doc(id).delete();
-        }
-    }
+    function hapus(id) { if(confirm("Hapus?")) db.collection("data_monitoring").doc(id).delete(); }
 
-    // Fungsi Cari
     function cariData() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
+        let val = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.getElementById("tableBody").getElementsByTagName("tr");
         for (let row of rows) {
-            let text = row.textContent.toLowerCase();
-            row.style.display = text.includes(input) ? "" : "none";
+            row.style.display = row.textContent.toLowerCase().includes(val) ? "" : "none";
         }
     }
 </script>
