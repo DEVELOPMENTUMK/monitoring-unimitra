@@ -13,68 +13,68 @@
     <style>
         body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
-        .login-card { padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 300px; }
+        .login-card { padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 280px; }
         
-        /* Layout Input Ringkas */
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .input-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-        input, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        input { flex: 1; min-width: 150px; }
-        textarea { width: 100%; height: 60px; resize: vertical; }
+        /* Form Input Dikecilkan (Sekitar 5cm / 400px) */
+        .container-input { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 400px; }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        input { flex: 1; min-width: 0; }
+        textarea { width: 100%; height: 50px; resize: none; margin-bottom: 8px; box-sizing: border-box; }
         
-        button { padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button { padding: 8px 15px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
         
         /* Tabel & Grafik */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; }
+        .container-table { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
         th { background-color: #f8f9fa; }
         
-        /* Ukuran Grafik Kecil */
-        .chart-wrapper { max-width: 500px; margin: 0 auto; }
+        /* Grafik Dikecilkan */
+        .chart-wrapper { max-width: 350px; margin: 10px auto; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2>UNIMITRA CLOUD</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password" style="width:100%;">
+        <h3>UNIMITRA LOGIN</h3>
+        <input type="email" id="email" placeholder="Email" style="width:100%;">
+        <input type="password" id="pass" placeholder="Password" style="width:100%; margin-top:5px;">
         <button onclick="login()" style="width:100%; margin-top:10px;">MASUK</button>
-        <p style="font-size: 12px; margin-top: 15px;">Belum punya akun? <span style="color:blue; cursor:pointer" onclick="daftar()">Daftar Disini</span></p>
+        <p style="font-size: 11px; margin-top: 10px;">Belum ada akun? <span style="color:blue; cursor:pointer" onclick="daftar()">Daftar</span></p>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
-        <h1 style="font-size: 20px;">PT. UNIMITRA KHARISMA</h1>
-        <button onclick="logout()" style="background:#dc3545;">Logout</button>
+        <h2 style="font-size: 18px; margin:0;">PT. UNIMITRA KHARISMA</h2>
+        <button onclick="logout()" style="background:#dc3545; font-size:12px;">Logout</button>
     </div>
 
-    <div class="container">
-        <h3>Form Input Data</h3>
-        <div class="input-group">
+    <div class="container-input">
+        <div class="input-row">
             <input type="text" id="model" placeholder="Model">
             <input type="text" id="vendor" placeholder="Vendor">
             <input type="text" id="season" placeholder="Season">
         </div>
-        <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
-        <button onclick="simpanData()" style="background:#28a745; width: 100%;">SIMPAN KE CLOUD</button>
+        <textarea id="keterangan" placeholder="Keterangan..."></textarea>
+        <button onclick="simpanData()" style="background:#28a745; width: 100%;">SIMPAN DATA</button>
     </div>
 
-    <div class="container">
-        <h3 style="text-align: center;">Statistik Season</h3>
+    <div class="container-input">
+        <h4 style="text-align: center; margin: 5px 0;">Statistik per Vendor</h4>
         <div class="chart-wrapper">
-            <canvas id="myChart"></canvas>
+            <canvas id="vendorChart"></canvas>
         </div>
     </div>
 
-    <div class="container" style="overflow-x: auto;">
+    <div class="container-table" style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
-                    <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
+                    <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Ket</th><th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -97,7 +97,7 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert(err.message)); }
+    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert("Email/Pass salah")); }
     function daftar() { auth.createUserWithEmailAndPassword(email.value, pass.value).then(() => alert("Berhasil!")).catch(err => alert(err.message)); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
@@ -110,53 +110,51 @@
     });
 
     function simpanData() {
-        if(!model.value || !vendor.value) return alert("Isi Model & Vendor!");
+        if(!model.value || !vendor.value) return alert("Isi data!");
         db.collection("data_unimitra").add({
-            model: model.value,
-            vendor: vendor.value,
-            season: season.value,
-            keterangan: keterangan.value,
+            model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
-            alert("Data tersimpan!");
             model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
         });
     }
 
     function muatData() {
         db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = ""; let i = 1; let counts = {};
+            let html = ""; let i = 1; let vendorCounts = {};
             snapshot.forEach(doc => {
                 let d = doc.data();
-                counts[d.season] = (counts[d.season] || 0) + 1;
+                // Hitung jumlah input per Vendor untuk grafik
+                let vName = d.vendor || "Tanpa Vendor";
+                vendorCounts[vName] = (vendorCounts[vName] || 0) + 1;
+
                 html += `<tr>
-                    <td>${i++}</td>
-                    <td>${d.model}</td>
-                    <td>${d.vendor}</td>
-                    <td>${d.season}</td>
-                    <td>${d.keterangan || '-'}</td>
-                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:5px; font-size:12px;">Hapus</button></td>
+                    <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
+                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:3px 7px; font-size:11px;">Hapus</button></td>
                 </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
-            renderChart(counts);
+            renderChart(vendorCounts);
         });
     }
 
     function renderChart(data) {
-        const ctx = document.getElementById('myChart').getContext('2d');
+        const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
         chartInstance = new Chart(ctx, {
-            type: 'bar',
+            type: 'pie', // Menggunakan grafik lingkaran (pie) agar lebih hemat tempat, atau ganti 'bar' jika suka batang
             data: {
                 labels: Object.keys(data),
-                datasets: [{ label: 'Jumlah per Season', data: Object.values(data), backgroundColor: '#1a73e8' }]
+                datasets: [{ 
+                    data: Object.values(data), 
+                    backgroundColor: ['#1a73e8', '#28a745', '#dc3545', '#ffc107', '#6f42c1'] 
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: true }
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
         });
     }
 
-    function hapus(id) { if(confirm("Hapus data?")) db.collection("data_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
 </script>
 </body>
 </html>
