@@ -30,16 +30,18 @@
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
         .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
+        /* FORM SIDE FIXED WIDTH */
         .form-side { width: 400px; }
         .chart-side { flex: 1; min-width: 320px; }
         
-        /* Grid diperbarui menjadi 2x2 untuk menampung Tanggal */
+        /* GRID LAYOUT: Model & Vendor baris 1, Season & Tanggal baris 2 */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
-        textarea { height: 50px; resize: none; }
+        textarea { height: 50px; resize: none; margin-top: 8px; }
+        label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
 
         .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 5px; }
+        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
 
         .search-container { margin-bottom: 10px; }
@@ -82,13 +84,17 @@
             <div class="card form-side">
                 <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
                 <input type="hidden" id="editId">
+                
                 <div class="input-grid">
-                    <input type="text" id="model" placeholder="Model">
-                    <input type="text" id="vendor" placeholder="Vendor">
-                    <input type="text" id="season" placeholder="Season">
-                    <input type="date" id="tglKirim" title="Tanggal Kirim">
+                    <div><label>Model</label><input type="text" id="model" placeholder="Input Model"></div>
+                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
                 </div>
-                <textarea id="keterangan" placeholder="Keterangan..."></textarea>
+                <div class="input-grid">
+                    <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
+                    <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
+                </div>
+
+                <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
             </div>
 
@@ -110,10 +116,10 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Tgl Kirim</th>
                         <th>Model</th>
                         <th>Vendor</th>
                         <th>Season</th>
+                        <th>Tgl Kirim</th>
                         <th>Keterangan</th>
                         <th>Aksi</th>
                     </tr>
@@ -168,11 +174,11 @@
             model: model.value, 
             vendor: vendor.value, 
             season: season.value, 
-            tglKirim: tglKirim.value, // Data baru
+            tglKirim: tglKirim.value, 
             keterangan: keterangan.value, 
             waktu: firebase.firestore.FieldValue.serverTimestamp() 
         };
-        if(!model.value || !vendor.value || !tglKirim.value) return alert("Lengkapi Model, Vendor & Tanggal!");
+        if(!model.value || !vendor.value || !tglKirim.value) return alert("Mohon lengkapi data!");
         id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
         resetForm();
     }
@@ -191,15 +197,14 @@
                 let d = doc.data();
                 vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
                 total++;
-                // Format tanggal untuk tampilan tabel
                 let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
                 
                 html += `<tr>
                     <td>${i++}</td>
-                    <td>${displayDate}</td>
                     <td>${d.model}</td>
                     <td>${d.vendor}</td>
                     <td>${d.season}</td>
+                    <td>${displayDate}</td>
                     <td>${d.keterangan || '-'}</td>
                     <td>
                         <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
@@ -234,7 +239,7 @@
     function persiapkanEdit(id, m, v, s, k, t) {
         document.getElementById("editId").value = id;
         model.value = m; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
-        tglKirim.value = t || ""; // Load tanggal kirim ke form
+        tglKirim.value = t || "";
         document.getElementById("btnAction").innerText = "UPDATE DATA";
         document.getElementById("btnAction").style.background = "#f59e0b";
         window.scrollTo({top: 0, behavior: 'smooth'});
