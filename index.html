@@ -4,74 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PT. UNIMITRA - Cloud System</title>
-    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:100; }
-        .login-card { padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; width: 280px; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:1000; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Form Input Dikecilkan (Sekitar 5cm / 400px) */
-        .container-input { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 400px; }
-        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
-        input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
-        input { flex: 1; min-width: 0; }
-        textarea { width: 100%; height: 50px; resize: none; margin-bottom: 8px; box-sizing: border-box; }
+        /* Layout Bersebelahan */
+        .flex-container { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .form-side { width: 380px; } /* Lebar form sekitar 5-6cm */
+        .chart-side { flex: 1; min-width: 300px; max-width: 450px; }
         
-        button { padding: 8px 15px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
+        .input-row { display: flex; gap: 5px; margin-bottom: 8px; }
+        input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 100%; box-sizing: border-box; }
+        textarea { height: 45px; resize: none; }
         
-        /* Tabel & Grafik */
-        .container-table { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; color: white; transition: 0.2s; }
+        .btn-save { background: #28a745; width: 100%; }
+        .btn-edit { background: #ffc107; color: black; margin-right: 5px; }
+        .btn-delete { background: #dc3545; }
+        .btn-tool { background: #6c757d; margin-top: 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
-        th { background-color: #f8f9fa; }
-        
-        /* Grafik Dikecilkan */
-        .chart-wrapper { max-width: 350px; margin: 10px auto; }
+        th { background: #f8f9fa; }
+
+        @media print { .header, .container-tools, .flex-container, .btn-delete, .btn-edit { display: none !important; } }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
-    <div class="login-card">
-        <h3>UNIMITRA LOGIN</h3>
-        <input type="email" id="email" placeholder="Email" style="width:100%;">
-        <input type="password" id="pass" placeholder="Password" style="width:100%; margin-top:5px;">
-        <button onclick="login()" style="width:100%; margin-top:10px;">MASUK</button>
-        <p style="font-size: 11px; margin-top: 10px;">Belum ada akun? <span style="color:blue; cursor:pointer" onclick="daftar()">Daftar</span></p>
+    <div style="text-align:center; padding:20px; border:1px solid #ddd; border-radius:8px;">
+        <h3>LOGIN UNIMITRA</h3>
+        <input type="email" id="email" placeholder="Email"><br>
+        <input type="password" id="pass" placeholder="Password" style="margin-top:5px;"><br>
+        <button onclick="login()" class="btn" style="background:#1a73e8; width:100%; margin-top:10px;">MASUK</button>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
         <h2 style="font-size: 18px; margin:0;">PT. UNIMITRA KHARISMA</h2>
-        <button onclick="logout()" style="background:#dc3545; font-size:12px;">Logout</button>
+        <button onclick="logout()" class="btn" style="background:#dc3545;">Logout</button>
     </div>
 
-    <div class="container-input">
-        <div class="input-row">
-            <input type="text" id="model" placeholder="Model">
-            <input type="text" id="vendor" placeholder="Vendor">
-            <input type="text" id="season" placeholder="Season">
+    <div class="flex-container">
+        <div class="card form-side">
+            <h4 style="margin-top:0;">Input Data</h4>
+            <input type="hidden" id="editId">
+            <div class="input-row">
+                <input type="text" id="model" placeholder="Model">
+                <input type="text" id="vendor" placeholder="Vendor">
+                <input type="text" id="season" placeholder="Season">
+            </div>
+            <textarea id="keterangan" placeholder="Keterangan..."></textarea>
+            <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
         </div>
-        <textarea id="keterangan" placeholder="Keterangan..."></textarea>
-        <button onclick="simpanData()" style="background:#28a745; width: 100%;">SIMPAN DATA</button>
-    </div>
 
-    <div class="container-input">
-        <h4 style="text-align: center; margin: 5px 0;">Statistik per Vendor</h4>
-        <div class="chart-wrapper">
-            <canvas id="vendorChart"></canvas>
+        <div class="card chart-side">
+            <h4 style="margin-top:0; text-align:center;">Grafik Vendor</h4>
+            <canvas id="vendorChart" style="max-height: 180px;"></canvas>
         </div>
     </div>
 
-    <div class="container-table" style="overflow-x: auto;">
-        <table>
+    <div class="container-tools" style="margin-top:15px;">
+        <button onclick="window.print()" class="btn btn-tool">PRINT DATA</button>
+        <button onclick="downloadExcel()" class="btn btn-tool" style="background:#157347;">DOWNLOAD EXCEL</button>
+    </div>
+
+    <div class="card" style="margin-top:15px; overflow-x: auto;">
+        <table id="dataTable">
             <thead>
                 <tr>
                     <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Ket</th><th>Aksi</th>
@@ -97,8 +106,7 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert("Email/Pass salah")); }
-    function daftar() { auth.createUserWithEmailAndPassword(email.value, pass.value).then(() => alert("Berhasil!")).catch(err => alert(err.message)); }
+    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert("Gagal")); }
     function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(user => {
@@ -110,13 +118,24 @@
     });
 
     function simpanData() {
-        if(!model.value || !vendor.value) return alert("Isi data!");
-        db.collection("data_unimitra").add({
+        const id = document.getElementById("editId").value;
+        const data = {
             model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
-        });
+        };
+
+        if (id) {
+            db.collection("data_unimitra").doc(id).update(data).then(() => resetForm());
+        } else {
+            db.collection("data_unimitra").add(data).then(() => resetForm());
+        }
+    }
+
+    function resetForm() {
+        document.getElementById("editId").value = "";
+        model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
+        document.getElementById("btnAction").innerText = "SIMPAN DATA";
+        document.getElementById("btnAction").style.background = "#28a745";
     }
 
     function muatData() {
@@ -124,13 +143,13 @@
             let html = ""; let i = 1; let vendorCounts = {};
             snapshot.forEach(doc => {
                 let d = doc.data();
-                // Hitung jumlah input per Vendor untuk grafik
-                let vName = d.vendor || "Tanpa Vendor";
-                vendorCounts[vName] = (vendorCounts[vName] || 0) + 1;
-
+                vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
                 html += `<tr>
                     <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
-                    <td><button onclick="hapus('${doc.id}')" style="background:red; padding:3px 7px; font-size:11px;">Hapus</button></td>
+                    <td>
+                        <button onclick="persiapkanEdit('${doc.id}', '${d.model}', '${d.vendor}', '${d.season}', '${d.keterangan}')" class="btn btn-edit">Edit</button>
+                        <button onclick="hapus('${doc.id}')" class="btn btn-delete">Hapus</button>
+                    </td>
                 </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
@@ -142,19 +161,30 @@
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
         chartInstance = new Chart(ctx, {
-            type: 'pie', // Menggunakan grafik lingkaran (pie) agar lebih hemat tempat, atau ganti 'bar' jika suka batang
+            type: 'bar',
             data: {
                 labels: Object.keys(data),
-                datasets: [{ 
-                    data: Object.values(data), 
-                    backgroundColor: ['#1a73e8', '#28a745', '#dc3545', '#ffc107', '#6f42c1'] 
-                }]
+                datasets: [{ label: 'Data per Vendor', data: Object.values(data), backgroundColor: '#1a73e8' }]
             },
-            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
     }
 
+    function persiapkanEdit(id, m, v, s, k) {
+        document.getElementById("editId").value = id;
+        model.value = m; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
+        document.getElementById("btnAction").innerText = "UPDATE DATA";
+        document.getElementById("btnAction").style.background = "#ffc107";
+        window.scrollTo(0,0);
+    }
+
     function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
+
+    function downloadExcel() {
+        const table = document.getElementById("dataTable");
+        const wb = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(wb, "Data_Monitoring_Unimitra.xlsx");
+    }
 </script>
 </body>
 </html>
