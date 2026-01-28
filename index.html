@@ -15,17 +15,17 @@
         :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
         body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* LOGIN */
+        /* LOGIN MEWAH */
         #loginOverlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
             background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
             display:flex; justify-content:center; align-items:center; z-index:2000; 
         }
         .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
-        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-        /* LAYOUT */
+        /* LAYOUT UTAMA */
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; }
         .main-container { padding: 20px; max-width: 1200px; margin: auto; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -41,8 +41,7 @@
         .btn-save { background: var(--success); color: white; width: 100%; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
 
-        /* SEARCH STYLING */
-        .search-container { margin-bottom: 15px; display: flex; align-items: center; }
+        .search-container { margin-bottom: 15px; }
         .search-input { width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -59,25 +58,34 @@
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2>PT.UNIMITRA KHARISMA</h2>
-        <p>Development Monitoring System </p>
-        <input type="email" id="email" placeholder="Email Address">
-        <input type="password" id="pass" placeholder="Password">
+        <h2 style="margin-bottom:0;">UNIMITRA</h2>
+        <p style="margin-top:5px;">Cloud Monitoring System</p>
+        
+        <input type="text" id="userInput" placeholder="Username">
+        <input type="password" id="passInput" placeholder="Password">
+        
         <button onclick="login()" class="btn-login">Sign In</button>
-        <div style="margin-top: 20px; font-size: 12px;">Belum punya akun? <span onclick="daftar()" style="color:var(--primary); cursor:pointer;">Daftar</span></div>
+        
+        <div style="margin-top: 20px; font-size: 12px;">
+            Belum punya Username? <br>
+            <span onclick="daftar()" style="color:var(--primary); cursor:pointer; font-weight:bold; text-decoration:underline;">Klik Daftar Disini</span>
+        </div>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
         <h2 style="margin:0; font-size: 18px;">PT. UNIMITRA KHARISMA</h2>
-        <button onclick="logout()" class="btn" style="background:#f1f5f9;">Sign Out</button>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span id="userDisplay" style="font-size:13px; color:#64748b;"></span>
+            <button onclick="logout()" class="btn" style="background:#f1f5f9;">Sign Out</button>
+        </div>
     </div>
 
     <div class="main-container">
         <div class="flex-row">
             <div class="card form-side">
-                <h3 style="margin-top:0; font-size: 15px;">Input Monitoring</h3>
+                <h3 style="margin-top:0; font-size: 15px;">Input Data</h3>
                 <input type="hidden" id="editId">
                 <div class="input-grid">
                     <input type="text" id="model" placeholder="Model">
@@ -89,7 +97,7 @@
             </div>
 
             <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik Vendor</h3>
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor</h3>
                 <canvas id="vendorChart" style="max-height: 180px;"></canvas>
             </div>
         </div>
@@ -97,7 +105,7 @@
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Model, Vendor, atau Season..." onkeyup="cariData()">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Data..." onkeyup="cariData()">
                 </div>
                 <div>
                     <button onclick="window.print()" class="btn btn-tool">Print Report</button>
@@ -132,14 +140,33 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert("Gagal Login")); }
-    function daftar() { auth.createUserWithEmailAndPassword(email.value, pass.value).then(() => alert("Berhasil")).catch(err => alert(err.message)); }
+    // LOGIKA USERNAME KE EMAIL (DIBALIK LAYAR)
+    function formatEmail(user) { return user.toLowerCase().trim() + "@unimitra.com"; }
+
+    function login() { 
+        const email = formatEmail(document.getElementById("userInput").value);
+        const pass = document.getElementById("passInput").value;
+        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Username atau Password Salah!")); 
+    }
+    
+    function daftar() {
+        const user = document.getElementById("userInput").value;
+        const pass = document.getElementById("passInput").value;
+        if(!user || !pass) return alert("Isi Username dan Password!");
+        
+        const email = formatEmail(user);
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then(() => alert("Berhasil Terdaftar sebagai: " + user))
+            .catch(err => alert("Gagal Daftar: " + err.message));
+    }
+
     function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("mainContent").style.display = "block";
+            document.getElementById("userDisplay").innerText = "User: " + user.email.split('@')[0];
             muatData();
         }
     });
@@ -150,7 +177,7 @@
             model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         };
-        if(!model.value || !vendor.value) return alert("Isi data!");
+        if(!model.value || !vendor.value) return alert("Lengkapi data!");
         id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
         resetForm();
     }
@@ -162,13 +189,11 @@
         document.getElementById("btnAction").style.background = "#16a34a";
     }
 
-    // FUNGSI PENCARIAN REAL-TIME
     function cariData() {
         let input = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-        for (let i = 0; i < rows.length; i++) {
-            let rowText = rows[i].textContent.toLowerCase();
-            rows[i].style.display = rowText.includes(input) ? "" : "none";
+        for (let row of rows) {
+            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
         }
     }
 
@@ -198,7 +223,7 @@
             type: 'bar',
             data: {
                 labels: Object.keys(data),
-                datasets: [{ label: 'Data per Vendor', data: Object.values(data), backgroundColor: '#2563eb', borderRadius: 4 }]
+                datasets: [{ label: 'Total Input', data: Object.values(data), backgroundColor: '#2563eb', borderRadius: 4 }]
             },
             options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
@@ -222,4 +247,3 @@
 </script>
 </body>
 </html>
-
