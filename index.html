@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT. UNIMITRA - Cloud System</title>
+    <title>UNIMITRA - Cloud Monitoring</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
@@ -11,83 +12,128 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:1000; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* Layout Bersebelahan */
-        .flex-container { display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .form-side { width: 380px; } /* Lebar form sekitar 5-6cm */
-        .chart-side { flex: 1; min-width: 300px; max-width: 450px; }
-        
-        .input-row { display: flex; gap: 5px; margin-bottom: 8px; }
-        input, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 100%; box-sizing: border-box; }
-        textarea { height: 45px; resize: none; }
-        
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; color: white; transition: 0.2s; }
-        .btn-save { background: #28a745; width: 100%; }
-        .btn-edit { background: #ffc107; color: black; margin-right: 5px; }
-        .btn-delete { background: #dc3545; }
-        .btn-tool { background: #6c757d; margin-top: 10px; }
+        /* TAMPILAN LOGIN MENARIK */
+        #loginOverlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
+            display:flex; justify-content:center; align-items:center; z-index:2000; 
+        }
+        .login-card { 
+            background: white; padding: 40px; border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; 
+        }
+        .login-card h2 { margin-bottom: 8px; color: #1e293b; }
+        .login-card p { font-size: 14px; color: #64748b; margin-bottom: 24px; }
+        .login-card input { 
+            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; 
+            border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        .login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .btn-login { 
+            width: 100%; padding: 12px; background: var(--primary); color: white; 
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
-        th { background: #f8f9fa; }
+        /* LAYOUT UTAMA */
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: white; padding: 15px 25px; border-bottom: 1px solid #e2e8f0; 
+        }
+        .main-container { padding: 20px; max-width: 1200px; margin: auto; }
+        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        /* FORM & GRAFIK SEBELAHAN */
+        .form-side { width: 380px; }
+        .chart-side { flex: 1; min-width: 300px; }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        textarea { height: 50px; resize: none; }
 
-        @media print { .header, .container-tools, .flex-container, .btn-delete, .btn-edit { display: none !important; } }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-save { background: var(--success); color: white; width: 100%; }
+        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-right: 8px; }
+        .btn-tool:hover { background: #f1f5f9; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        th { background: #f8fafc; color: #64748b; text-transform: uppercase; font-size: 12px; }
+
+        /* PRINT SETTINGS - Agar Grafik Ikut Terbawa */
+        @media print {
+            body { background: white; padding: 0; }
+            .header, .form-side, .btn-tool, .login-card, #loginOverlay, td:last-child, th:last-child { display: none !important; }
+            .main-container { padding: 0; }
+            .card { border: none; box-shadow: none; width: 100%; }
+            .chart-side { width: 100%; max-width: 100%; page-break-inside: avoid; }
+            canvas { max-width: 100% !important; height: auto !important; }
+        }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
-    <div style="text-align:center; padding:20px; border:1px solid #ddd; border-radius:8px;">
-        <h3>LOGIN UNIMITRA</h3>
-        <input type="email" id="email" placeholder="Email"><br>
-        <input type="password" id="pass" placeholder="Password" style="margin-top:5px;"><br>
-        <button onclick="login()" class="btn" style="background:#1a73e8; width:100%; margin-top:10px;">MASUK</button>
+    <div class="login-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/1160/1160358.png" width="50" style="margin-bottom: 15px;">
+        <h2>UNIMITRA</h2>
+        <p>Monitoring System Cloud</p>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="login()" class="btn-login">Sign In</button>
+        <div style="margin-top: 20px; font-size: 12px; color: #64748b;">
+            Belum punya akun? <span onclick="daftar()" style="color:var(--primary); cursor:pointer; font-weight:600;">Daftar</span>
+        </div>
     </div>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
-        <h2 style="font-size: 18px; margin:0;">PT. UNIMITRA KHARISMA</h2>
-        <button onclick="logout()" class="btn" style="background:#dc3545;">Logout</button>
+        <h2 style="font-size: 18px; color: #1e293b;">PT. UNIMITRA KHARISMA</h2>
+        <button onclick="logout()" class="btn" style="background:#f1f5f9; color: #64748b;">Sign Out</button>
     </div>
 
-    <div class="flex-container">
-        <div class="card form-side">
-            <h4 style="margin-top:0;">Input Data</h4>
-            <input type="hidden" id="editId">
-            <div class="input-row">
-                <input type="text" id="model" placeholder="Model">
-                <input type="text" id="vendor" placeholder="Vendor">
-                <input type="text" id="season" placeholder="Season">
+    <div class="main-container">
+        <div class="flex-row">
+            <div class="card form-side">
+                <h3 style="margin-top:0; font-size: 16px;">Input Monitoring</h3>
+                <input type="hidden" id="editId">
+                <div class="input-grid">
+                    <input type="text" id="model" placeholder="Model">
+                    <input type="text" id="vendor" placeholder="Vendor">
+                    <input type="text" id="season" placeholder="Season">
+                </div>
+                <textarea id="keterangan" placeholder="Keterangan Tambahan..."></textarea>
+                <button onclick="simpanData()" id="btnAction" class="btn btn-save" style="margin-top: 10px;">SIMPAN DATA</button>
             </div>
-            <textarea id="keterangan" placeholder="Keterangan..."></textarea>
-            <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
+
+            <div class="card chart-side">
+                <h3 style="margin-top:0; font-size: 16px; text-align: center;">Statistik Vendor</h3>
+                <canvas id="vendorChart" style="max-height: 180px;"></canvas>
+            </div>
         </div>
 
-        <div class="card chart-side">
-            <h4 style="margin-top:0; text-align:center;">Grafik Vendor</h4>
-            <canvas id="vendorChart" style="max-height: 180px;"></canvas>
+        <div class="card">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-size: 16px;">Database Terkini</h3>
+                <div>
+                    <button onclick="window.print()" class="btn btn-tool">Print Report</button>
+                    <button onclick="downloadExcel()" class="btn btn-tool" style="color: var(--success);">Export Excel</button>
+                </div>
+            </div>
+            
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Keterangan</th><th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
-    </div>
-
-    <div class="container-tools" style="margin-top:15px;">
-        <button onclick="window.print()" class="btn btn-tool">PRINT DATA</button>
-        <button onclick="downloadExcel()" class="btn btn-tool" style="background:#157347;">DOWNLOAD EXCEL</button>
-    </div>
-
-    <div class="card" style="margin-top:15px; overflow-x: auto;">
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>No</th><th>Model</th><th>Vendor</th><th>Season</th><th>Ket</th><th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
     </div>
 </div>
 
@@ -106,7 +152,18 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    function login() { auth.signInWithEmailAndPassword(email.value, pass.value).catch(err => alert("Gagal")); }
+    function login() { 
+        auth.signInWithEmailAndPassword(email.value, pass.value)
+            .catch(err => alert("Login Gagal: Periksa Email/Password")); 
+    }
+    
+    function daftar() {
+        if(!email.value || !pass.value) return alert("Isi email & pass!");
+        auth.createUserWithEmailAndPassword(email.value, pass.value)
+            .then(() => alert("Akun berhasil dibuat! Silakan Sign In."))
+            .catch(err => alert(err.message));
+    }
+
     function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(user => {
@@ -117,25 +174,27 @@
         }
     });
 
-    function simpanData() {
+    async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = {
             model: model.value, vendor: vendor.value, season: season.value, keterangan: keterangan.value,
             waktu: firebase.firestore.FieldValue.serverTimestamp()
         };
+        if(!model.value || !vendor.value) return alert("Lengkapi data!");
 
         if (id) {
-            db.collection("data_unimitra").doc(id).update(data).then(() => resetForm());
+            await db.collection("data_unimitra").doc(id).update(data);
         } else {
-            db.collection("data_unimitra").add(data).then(() => resetForm());
+            await db.collection("data_unimitra").add(data);
         }
+        resetForm();
     }
 
     function resetForm() {
         document.getElementById("editId").value = "";
         model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = "";
         document.getElementById("btnAction").innerText = "SIMPAN DATA";
-        document.getElementById("btnAction").style.background = "#28a745";
+        document.getElementById("btnAction").style.background = "#16a34a";
     }
 
     function muatData() {
@@ -147,8 +206,8 @@
                 html += `<tr>
                     <td>${i++}</td><td>${d.model}</td><td>${d.vendor}</td><td>${d.season}</td><td>${d.keterangan || '-'}</td>
                     <td>
-                        <button onclick="persiapkanEdit('${doc.id}', '${d.model}', '${d.vendor}', '${d.season}', '${d.keterangan}')" class="btn btn-edit">Edit</button>
-                        <button onclick="hapus('${doc.id}')" class="btn btn-delete">Hapus</button>
+                        <button onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}')" style="background:none; border:none; color:var(--warning); cursor:pointer; font-weight:bold;">Edit</button>
+                        <button onclick="hapus('${doc.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</button>
                     </td>
                 </tr>`;
             });
@@ -164,7 +223,12 @@
             type: 'bar',
             data: {
                 labels: Object.keys(data),
-                datasets: [{ label: 'Data per Vendor', data: Object.values(data), backgroundColor: '#1a73e8' }]
+                datasets: [{ 
+                    label: 'Jumlah Model', 
+                    data: Object.values(data), 
+                    backgroundColor: '#2563eb',
+                    borderRadius: 5
+                }]
             },
             options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
@@ -173,17 +237,19 @@
     function persiapkanEdit(id, m, v, s, k) {
         document.getElementById("editId").value = id;
         model.value = m; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
-        document.getElementById("btnAction").innerText = "UPDATE DATA";
-        document.getElementById("btnAction").style.background = "#ffc107";
-        window.scrollTo(0,0);
+        document.getElementById("btnAction").innerText = "UPDATE DATA SEKARANG";
+        document.getElementById("btnAction").style.background = "#f59e0b";
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus data?")) db.collection("data_unimitra").doc(id).delete(); }
 
     function downloadExcel() {
         const table = document.getElementById("dataTable");
-        const wb = XLSX.utils.table_to_book(table);
-        XLSX.writeFile(wb, "Data_Monitoring_Unimitra.xlsx");
+        const data = XLSX.utils.table_to_sheet(table);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, data, "Monitoring");
+        XLSX.writeFile(wb, "Laporan_Unimitra.xlsx");
     }
 </script>
 </body>
