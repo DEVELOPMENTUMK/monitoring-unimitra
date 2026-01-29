@@ -260,20 +260,42 @@
         });
     }
 
+    // Fungsi Grafik yang sudah dimodifikasi untuk menampilkan Nama + Jumlah Model
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
+        
+        // Buat Label Custom (Vendor + Jumlah)
+        const customLabels = Object.keys(data).map(v => `${v} (${data[v]} Model)`);
+
         const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
         const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
+
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Object.keys(data),
-                datasets: [{ label: 'Persentase (%)', data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), backgroundColor: backgroundColors, borderRadius: 4 }]
+                labels: customLabels,
+                datasets: [{ 
+                    label: 'Persentase (%)', 
+                    data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), 
+                    backgroundColor: backgroundColors, 
+                    borderRadius: 4 
+                }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}% dari total data` } } },
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        callbacks: { 
+                            label: (ctx) => {
+                                const vendorName = Object.keys(data)[ctx.dataIndex];
+                                const count = data[vendorName];
+                                return ` ${ctx.raw}% (${count} Model)`;
+                            } 
+                        } 
+                    } 
+                },
                 scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } }
             }
         });
@@ -303,4 +325,3 @@
 </script>
 </body>
 </html>
-
