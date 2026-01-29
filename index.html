@@ -119,12 +119,13 @@
                 
                 <div class="input-grid">
                     <div><label>Model</label><input type="text" id="model" placeholder="Input Model"></div>
-                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
+                    <div><label>Desainer</label><input type="text" id="desainer" placeholder="Nama Desainer"></div>
                 </div>
                 <div class="input-grid">
+                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
                     <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
-                    <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
                 </div>
+                <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
 
                 <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
@@ -149,6 +150,7 @@
                     <tr>
                         <th>No</th>
                         <th>Model</th>
+                        <th>Desainer</th>
                         <th>Vendor</th>
                         <th>Season</th>
                         <th>Tgl Kirim</th>
@@ -179,7 +181,6 @@
 
     const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
 
-    // NAVIGASI
     function bukaHalamanInput() {
         document.getElementById("menuSelection").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
@@ -205,17 +206,17 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById("loginOverlay").style.display = "none";
-            document.getElementById("menuSelection").style.display = "flex"; // Tampilkan menu dulu
+            document.getElementById("menuSelection").style.display = "flex";
             document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
             muatData();
         }
     });
 
-    // LOGIKA DATA (Firestore)
     async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = { 
             model: model.value, 
+            desainer: desainer.value,
             vendor: vendor.value, 
             season: season.value, 
             tglKirim: tglKirim.value, 
@@ -229,7 +230,7 @@
 
     function resetForm() {
         document.getElementById("editId").value = "";
-        model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
+        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
         document.getElementById("btnAction").innerText = "SIMPAN DATA";
         document.getElementById("btnAction").style.background = "#16a34a";
     }
@@ -245,13 +246,14 @@
                 
                 html += `<tr>
                     <td>${i++}</td>
-                    <td>${d.model}</td>
+                    <td><b>${d.model}</b></td>
+                    <td>${d.desainer || '-'}</td>
                     <td>${d.vendor}</td>
                     <td>${d.season}</td>
                     <td>${displayDate}</td>
                     <td>${d.keterangan || '-'}</td>
                     <td>
-                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
+                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.desainer || ''}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
                         <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span>
                     </td>
                 </tr>`;
@@ -280,9 +282,9 @@
         });
     }
 
-    function persiapkanEdit(id, m, v, s, k, t) {
+    function persiapkanEdit(id, m, ds, v, s, k, t) {
         document.getElementById("editId").value = id;
-        model.value = m; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
+        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
         tglKirim.value = t || "";
         document.getElementById("btnAction").innerText = "UPDATE DATA";
         document.getElementById("btnAction").style.background = "#f59e0b";
