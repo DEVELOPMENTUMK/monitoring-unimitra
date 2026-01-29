@@ -3,289 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIMITRA - Development Monitoring</title>
+    <title>UNIMITRA - Cloud Monitoring</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        :root { --primary: #1e293b; --accent: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; margin: 0; color: #334155; }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* LOGIN */
-        #loginPage { position: fixed; inset: 0; background: linear-gradient(135deg, #0f172a, #2563eb); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .card-login { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); width: 350px; text-align: center; }
-        
-        /* MENU */
-        #menuPage { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 200px); gap: 20px; }
-        .menu-card { background: white; padding: 30px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border: 2px solid var(--accent); }
+        /* LOGIN OVERLAY */
+        #loginOverlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
+            display:flex; justify-content:center; align-items:center; z-index:2000; 
+        }
+        .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
+        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-        /* DASHBOARD */
-        #mainPage { display: none; }
-        .header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 500; }
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-        
-        .grid-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        
-        /* FORM & TABLE */
-        .form-group { margin-bottom: 15px; }
-        label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px; color: #64748b; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 12px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
-        
-        .btn { padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: white; width: 100%; }
-        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #64748b; }
-        .btn-edit { color: var(--warning); background: none; margin-right: 10px; }
-        .btn-delete { color: var(--danger); background: none; }
+        /* MENU SELECTION */
+        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
+        .menu-container { display: flex; gap: 20px; }
+        .menu-card { background: white; width: 200px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
 
-        .search-bar { width: 300px; margin-bottom: 0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; background: #e0e7ff; color: #4338ca; }
+        /* DASHBOARD STYLE (Tampilan Awal Anda) */
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .main-container { padding: 20px; max-width: 1250px; margin: auto; }
+        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
+        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        .form-side { width: 400px; }
+        .chart-side { flex: 1; min-width: 320px; }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        input, textarea, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
+        label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
+
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<div id="loginPage">
-    <div class="card-login">
-        <h2 style="margin: 0; color: var(--primary);">UNIMITRA</h2>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 30px;">Development Monitoring System</p>
-        <input type="text" id="user" placeholder="Username" style="margin-bottom: 10px;"><br>
-        <input type="password" id="pass" placeholder="Password"><br>
-        <button class="btn btn-primary" style="margin-top: 20px;" onclick="doLogin()">SIGN IN</button>
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2>PT.UNIMITRA KHARISMA</h2>
+        <input type="text" id="userInput" placeholder="Username">
+        <input type="password" id="passInput" placeholder="Password">
+        <button onclick="login()" class="btn-login">SIGN IN</button>
     </div>
 </div>
 
-<div id="menuPage">
-    <h2 style="margin-bottom: 40px;">Main Navigation</h2>
-    <div class="menu-grid">
-        <div class="menu-card" onclick="showDashboard()">
-            <div style="font-size: 40px; margin-bottom: 10px;">📊</div>
-            <h3 style="margin:0;">Dashboard</h3>
-            <p style="font-size: 12px; color:#64748b;">Monitoring & Data</p>
-        </div>
-        <div class="menu-card" style="opacity: 0.5; cursor: not-allowed;">
-            <div style="font-size: 40px; margin-bottom: 10px;">📦</div>
-            <h3 style="margin:0;">Inventory</h3>
-            <p style="font-size: 12px; color:#64748b;">Coming Soon</p>
+<div id="menuSelection">
+    <h2>Pilih Layanan</h2>
+    <div class="menu-container">
+        <div class="menu-card" onclick="bukaDashboard()">
+            <div style="font-size:40px">📝</div>
+            <h3>Input Data Development</h3>
         </div>
     </div>
-    <button class="btn btn-outline" style="margin-top: 40px;" onclick="location.reload()">Logout</button>
 </div>
 
-<div id="mainPage">
+<div id="mainContent" style="display:none;">
     <div class="header">
-        <div style="display:flex; align-items:center;">
-            <button class="btn btn-outline" onclick="showMenu()">🏠 Menu</button>
-            <h3 style="margin: 0 0 0 20px; color: var(--accent);">PT. UNIMITRA KHARISMA</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button onclick="kembaliMenu()" class="btn-tool">🏠 Menu</button>
+            <h2 style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
         </div>
-        <div id="userInfo" style="font-size: 13px; font-weight: 600;"></div>
+        <button onclick="location.reload()" class="btn btn-tool">Logout</button>
     </div>
 
-    <div class="container">
-        <div class="grid-layout">
-            <div class="card">
-                <h4 style="margin-top:0;">Input Development Data</h4>
-                <input type="hidden" id="editIndex">
-                <div class="form-group">
-                    <label>Model Name</label>
-                    <input type="text" id="model" placeholder="Contoh: REACTO HYDRA">
+    <div class="main-container">
+        <div class="flex-row">
+            <div class="card form-side">
+                <h3 style="margin-top:0; font-size: 15px;">Form Entry (LocalStorage)</h3>
+                <input type="hidden" id="editId">
+                <div class="input-grid">
+                    <div><label>Model</label><input type="text" id="model"></div>
+                    <div><label>Season</label>
+                        <select id="season">
+                            <option value="SS24">SS24</option>
+                            <option value="FH24">FH24</option>
+                            <option value="SS25">SS25</option>
+                            <option value="FH25">FH25</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Season</label>
-                    <select id="season">
-                        <option value="SS24">SS24</option>
-                        <option value="FH24">FH24</option>
-                        <option value="SS25">SS25</option>
-                        <option value="FH25">FH25</option>
-                        <option value="SS26">SS26</option>
-                    </select>
+                <div class="input-grid">
+                    <div><label>Mold/Last</label><input type="text" id="mold"></div>
+                    <div><label>Tanggal</label><input type="date" id="tgl"></div>
                 </div>
-                <div class="form-group">
-                    <label>Last / Mold</label>
-                    <input type="text" id="mold" placeholder="PRL 015 / PRM 080">
-                </div>
-                <div class="form-group">
-                    <label>Keterangan / Progress</label>
-                    <textarea id="ket" rows="3"></textarea>
-                </div>
-                <button class="btn btn-primary" id="saveBtn" onclick="saveData()">SIMPAN DATA</button>
-                <button class="btn btn-outline" id="cancelBtn" style="display:none; margin-top:10px;" onclick="resetForm()">BATAL</button>
-                
-                <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                    <label>Import via Excel</label>
-                    <input type="file" id="importExcel" accept=".xlsx, .xls">
-                </div>
+                <label>Keterangan</label>
+                <textarea id="keterangan" rows="2"></textarea>
+                <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
+                <hr>
+                <label>Import Data Excel Baru</label>
+                <input type="file" id="uploadExcel" accept=".xlsx, .xls">
             </div>
 
-            <div>
-                <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <input type="text" class="search-bar" id="search" placeholder="🔍 Cari model atau season..." onkeyup="renderTable()">
-                    <button class="btn btn-outline" onclick="exportToExcel()" style="color: var(--success);">Export Excel</button>
-                </div>
-                
-                <div class="card" style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Model</th>
-                                <th>Season</th>
-                                <th>Mold/Last</th>
-                                <th>Keterangan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
+            <div class="card chart-side">
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik Season</h3>
+                <canvas id="myChart" style="max-height: 200px;"></canvas>
             </div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <input type="text" id="cari" placeholder="🔍 Cari model..." onkeyup="muatTabel()" style="width:300px; padding:8px;">
+                <button onclick="exportExcel()" class="btn btn-tool" style="color:var(--success)">Download Excel</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th><th>Model</th><th>Season</th><th>Mold/Last</th><th>Tanggal</th><th>Keterangan</th><th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-    // DATA AWAL DARI FILE EXCEL YANG ANDA BERIKAN
-    let defaultData = [
-        { model: "ACC UNO", season: "SS24", mold: "OK", ket: "SMS 3 MARET 2023" },
-        { model: "METASALA RIVAL 4", season: "SS24", mold: "OK", ket: "SMS 3 MARET 2023" },
-        { model: "REACTO HYDRA SS", season: "SS24", mold: "OK", ket: "PROSES VENDOR BUBBLE" },
-        { model: "MOJO 90", season: "SS24", mold: "PAOS 58", ket: "REVIEW 12/09/2023" },
-        { model: "CITY WAVE", season: "SS24", mold: "P32", ket: "TEST 1 2023-02-06" }
+    // Data bawaan dari file Excel yang Anda berikan
+    const dataDefault = [
+        { model: "ACC UNO", season: "SS24", mold: "OK", tgl: "2023-03-03", ket: "SMS 3 MARET 2023" },
+        { model: "MOJO 90", season: "SS24", mold: "PAOS 58", tgl: "2023-02-16", ket: "REVIEW 12/09/2023" },
+        { model: "NORTH", season: "FH24", mold: "PAOS 59", tgl: "2023-07-14", ket: "MOVE FROM SS24" }
     ];
 
-    // Load data dari LocalStorage atau pakai data default
-    let appData = JSON.parse(localStorage.getItem('unimitraData')) || defaultData;
+    let database = JSON.parse(localStorage.getItem('umk_db')) || dataDefault;
+    let chartInstance = null;
 
-    function doLogin() {
-        if(document.getElementById('user').value !== "" && document.getElementById('pass').value !== "") {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('menuPage').style.display = 'flex';
-            document.getElementById('userInfo').innerText = "Admin: " + document.getElementById('user').value.toUpperCase();
-        } else {
-            alert("Masukkan Username & Password");
+    function login() {
+        if(userInput.value !== "" && passInput.value !== "") {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('menuSelection').style.display = 'flex';
         }
     }
 
-    function showMenu() {
-        document.getElementById('mainPage').style.display = 'none';
-        document.getElementById('menuPage').style.display = 'flex';
+    function bukaDashboard() {
+        document.getElementById('menuSelection').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        muatTabel();
     }
 
-    function showDashboard() {
-        document.getElementById('menuPage').style.display = 'none';
-        document.getElementById('mainPage').style.display = 'block';
-        renderTable();
+    function kembaliMenu() {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('menuSelection').style.display = 'flex';
     }
 
-    // CRUD LOGIC
-    function renderTable() {
-        const tbody = document.getElementById('tableBody');
-        const searchTerm = document.getElementById('search').value.toLowerCase();
-        tbody.innerHTML = "";
+    function simpanData() {
+        const id = document.getElementById('editId').value;
+        const baru = {
+            model: model.value,
+            season: season.value,
+            mold: mold.value,
+            tgl: tgl.value,
+            ket: keterangan.value
+        };
 
-        appData.forEach((item, index) => {
-            if(item.model.toLowerCase().includes(searchTerm) || item.season.toLowerCase().includes(searchTerm)) {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><strong>${item.model}</strong></td>
-                    <td><span class="badge">${item.season}</span></td>
-                    <td>${item.mold}</td>
-                    <td>${item.ket}</td>
+        if(id === "") {
+            database.unshift(baru);
+        } else {
+            database[id] = baru;
+            document.getElementById('editId').value = "";
+            document.getElementById('btnAction').innerText = "SIMPAN DATA";
+            document.getElementById('btnAction').style.background = "var(--success)";
+        }
+
+        localStorage.setItem('umk_db', JSON.stringify(database));
+        resetForm();
+        muatTabel();
+    }
+
+    function muatTabel() {
+        const body = document.getElementById('tableBody');
+        const filter = document.getElementById('cari').value.toLowerCase();
+        body.innerHTML = "";
+        
+        let stats = {};
+
+        database.forEach((d, i) => {
+            if(d.model.toLowerCase().includes(filter)) {
+                stats[d.season] = (stats[d.season] || 0) + 1;
+                body.innerHTML += `<tr>
+                    <td>${i+1}</td>
+                    <td><b>${d.model}</b></td>
+                    <td>${d.season}</td>
+                    <td>${d.mold}</td>
+                    <td>${d.tgl}</td>
+                    <td>${d.ket}</td>
                     <td>
-                        <button class="btn-edit" onclick="editData(${index})">Edit</button>
-                        <button class="btn-delete" onclick="deleteData(${index})">Hapus</button>
+                        <a href="#" onclick="edit(${i})" style="color:var(--warning)">Edit</a> | 
+                        <a href="#" onclick="hapus(${i})" style="color:var(--danger)">Hapus</a>
                     </td>
-                `;
-                tbody.appendChild(tr);
+                </tr>`;
             }
         });
-        localStorage.setItem('unimitraData', JSON.stringify(appData));
+        updateChart(stats);
     }
 
-    function saveData() {
-        const model = document.getElementById('model').value;
-        const season = document.getElementById('season').value;
-        const mold = document.getElementById('mold').value;
-        const ket = document.getElementById('ket').value;
-        const editIndex = document.getElementById('editIndex').value;
-
-        if(!model) return alert("Nama Model wajib diisi!");
-
-        const newData = { model, season, mold, ket };
-
-        if(editIndex === "") {
-            appData.unshift(newData); // Tambah ke atas
-        } else {
-            appData[editIndex] = newData; // Update
-        }
-
-        resetForm();
-        renderTable();
+    function edit(i) {
+        const d = database[i];
+        document.getElementById('editId').value = i;
+        model.value = d.model;
+        season.value = d.season;
+        mold.value = d.mold;
+        tgl.value = d.tgl;
+        keterangan.value = d.ket;
+        document.getElementById('btnAction').innerText = "UPDATE DATA";
+        document.getElementById('btnAction').style.background = "var(--warning)";
     }
 
-    function editData(index) {
-        const item = appData[index];
-        document.getElementById('model').value = item.model;
-        document.getElementById('season').value = item.season;
-        document.getElementById('mold').value = item.mold;
-        document.getElementById('ket').value = item.ket;
-        document.getElementById('editIndex').value = index;
-        
-        document.getElementById('saveBtn').innerText = "UPDATE DATA";
-        document.getElementById('saveBtn').style.background = "var(--warning)";
-        document.getElementById('cancelBtn').style.display = "block";
-    }
-
-    function deleteData(index) {
-        if(confirm("Hapus data ini?")) {
-            appData.splice(index, 1);
-            renderTable();
+    function hapus(i) {
+        if(confirm("Hapus data?")) {
+            database.splice(i, 1);
+            localStorage.setItem('umk_db', JSON.stringify(database));
+            muatTabel();
         }
     }
 
     function resetForm() {
-        document.getElementById('model').value = "";
-        document.getElementById('mold').value = "";
-        document.getElementById('ket').value = "";
-        document.getElementById('editIndex').value = "";
-        document.getElementById('saveBtn').innerText = "SIMPAN DATA";
-        document.getElementById('saveBtn').style.background = "var(--accent)";
-        document.getElementById('cancelBtn').style.display = "none";
+        model.value = ""; mold.value = ""; tgl.value = ""; keterangan.value = "";
     }
 
-    // EXPORT & IMPORT
-    function exportToExcel() {
-        const ws = XLSX.utils.json_to_sheet(appData);
+    function updateChart(stats) {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(stats),
+                datasets: [{ label: 'Jumlah Model', data: Object.values(stats), backgroundColor: '#2563eb' }]
+            }
+        });
+    }
+
+    function exportExcel() {
+        const ws = XLSX.utils.json_to_sheet(database);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Development_Data");
-        XLSX.writeFile(wb, "Data_Unimitra_Export.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Data");
+        XLSX.writeFile(wb, "Data_Unimitra.xlsx");
     }
 
-    document.getElementById('importExcel').addEventListener('change', function(e) {
+    // Handle Import Excel
+    document.getElementById('uploadExcel').addEventListener('change', function(e) {
         const reader = new FileReader();
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet);
             
-            // Mapping data excel ke format aplikasi
-            const mappedData = jsonData.map(row => ({
-                model: row.MODEL || row.Model || "Unknown",
+            const imported = json.map(row => ({
+                model: row.MODEL || row.Model || "Tanpa Nama",
                 season: row.SEASON || row.Season || "SS24",
                 mold: row.MOLD || row.Last || "-",
-                ket: row.KETERANGAN || row.Ket || "-"
+                tgl: row.DATE || row.Tanggal || "",
+                ket: row.KETERANGAN || row.Ket || ""
             }));
 
-            appData = [...mappedData, ...appData];
-            renderTable();
-            alert("Berhasil mengimpor " + mappedData.length + " data!");
+            database = [...imported, ...database];
+            localStorage.setItem('umk_db', JSON.stringify(database));
+            muatTabel();
+            alert("Import Berhasil!");
         };
         reader.readAsArrayBuffer(e.target.files[0]);
     });
