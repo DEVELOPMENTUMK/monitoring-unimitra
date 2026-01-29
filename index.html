@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNIMITRA - Cloud Monitoring</title>
     
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -21,13 +24,21 @@
         .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
 
-        /* MENU SELECTION */
-        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
-        .menu-container { display: flex; gap: 20px; }
-        .menu-card { background: white; width: 200px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
+        /* MENU SELECTION STYLE */
+        #menuSelection {
+            height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9;
+        }
+        .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .menu-card {
+            background: white; width: 220px; padding: 30px; border-radius: 15px; text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .menu-icon { font-size: 50px; margin-bottom: 15px; }
 
-        /* DASHBOARD STYLE (Tampilan Awal Anda) */
+        /* DASHBOARD STYLE */
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .main-container { padding: 20px; max-width: 1250px; margin: auto; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
@@ -37,91 +48,112 @@
         .chart-side { flex: 1; min-width: 320px; }
         
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        input, textarea, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
+        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
+        textarea { height: 50px; resize: none; margin-top: 8px; }
         label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
 
         .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
         .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
+
+        .search-container { margin-bottom: 10px; }
+        .search-input { width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
+
+        @media print {
+            .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .search-container, td:last-child, th:last-child { display: none !important; }
+            .card { border: none; box-shadow: none; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2>PT.UNIMITRA KHARISMA</h2>
+        <h2 style="margin:0;">PT.UNIMITRA KHARISMA</h2>
+        <p style="margin-top:5px; font-size: 13px; color:#64748b;">Development Monitoring System</p>
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
         <button onclick="login()" class="btn-login">SIGN IN</button>
+        <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
 </div>
 
 <div id="menuSelection">
-    <h2>Pilih Layanan</h2>
+    <h2 style="margin-bottom: 30px; color: #1e293b;">Pilih Layanan Unimitra</h2>
     <div class="menu-container">
-        <div class="menu-card" onclick="bukaDashboard()">
-            <div style="font-size:40px">📝</div>
-            <h3>Input Data Development</h3>
+        <div class="menu-card" onclick="bukaHalamanInput()">
+            <div class="menu-icon">📝</div>
+            <h3 style="margin:0; color: var(--primary);">Input Data</h3>
+            <p style="font-size: 12px; color: #64748b;">Monitoring Development</p>
+        </div>
+        <div class="menu-card" style="opacity: 0.6; cursor: not-allowed;">
+            <div class="menu-icon">📊</div>
+            <h3 style="margin:0;">Laporan Stok</h3>
+            <p style="font-size: 12px;">(Segera Hadir)</p>
         </div>
     </div>
+    <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b;">Keluar / Logout</button>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliMenu()" class="btn-tool">🏠 Menu</button>
+            <button onclick="kembaliKeMenu()" class="btn-tool" style="margin:0;">🏠 Menu</button>
             <h2 style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
         </div>
-        <button onclick="location.reload()" class="btn btn-tool">Logout</button>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></span>
+            <button onclick="logout()" class="btn" style="background:#f1f5f9; color:#64748b;">Logout</button>
+        </div>
     </div>
 
     <div class="main-container">
         <div class="flex-row">
             <div class="card form-side">
-                <h3 style="margin-top:0; font-size: 15px;">Form Entry (LocalStorage)</h3>
+                <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
                 <input type="hidden" id="editId">
+                
                 <div class="input-grid">
-                    <div><label>Model</label><input type="text" id="model"></div>
-                    <div><label>Season</label>
-                        <select id="season">
-                            <option value="SS24">SS24</option>
-                            <option value="FH24">FH24</option>
-                            <option value="SS25">SS25</option>
-                            <option value="FH25">FH25</option>
-                        </select>
-                    </div>
+                    <div><label>Model</label><input type="text" id="model" placeholder="Input Model"></div>
+                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
                 </div>
                 <div class="input-grid">
-                    <div><label>Mold/Last</label><input type="text" id="mold"></div>
-                    <div><label>Tanggal</label><input type="date" id="tgl"></div>
+                    <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
+                    <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
                 </div>
-                <label>Keterangan</label>
-                <textarea id="keterangan" rows="2"></textarea>
+
+                <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
-                <hr>
-                <label>Import Data Excel Baru</label>
-                <input type="file" id="uploadExcel" accept=".xlsx, .xls">
             </div>
 
             <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik Season</h3>
-                <canvas id="myChart" style="max-height: 200px;"></canvas>
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor (%)</h3>
+                <canvas id="vendorChart" style="max-height: 180px;"></canvas>
             </div>
         </div>
 
         <div class="card">
             <div style="display:flex; justify-content: space-between; align-items: center;">
-                <input type="text" id="cari" placeholder="🔍 Cari model..." onkeyup="muatTabel()" style="width:300px; padding:8px;">
-                <button onclick="exportExcel()" class="btn btn-tool" style="color:var(--success)">Download Excel</button>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Data..." onkeyup="cariData()">
+                <div>
+                    <button onclick="window.print()" class="btn btn-tool">Print Report</button>
+                    <button onclick="downloadExcel()" class="btn btn-tool" style="color: var(--success);">Export Excel</button>
+                </div>
             </div>
-            <table>
+            <table id="dataTable">
                 <thead>
                     <tr>
-                        <th>No</th><th>Model</th><th>Season</th><th>Mold/Last</th><th>Tanggal</th><th>Keterangan</th><th>Aksi</th>
+                        <th>No</th>
+                        <th>Model</th>
+                        <th>Vendor</th>
+                        <th>Season</th>
+                        <th>Tgl Kirim</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -131,152 +163,144 @@
 </div>
 
 <script>
-    // Data bawaan dari file Excel yang Anda berikan
-    const dataDefault = [
-        { model: "ACC UNO", season: "SS24", mold: "OK", tgl: "2023-03-03", ket: "SMS 3 MARET 2023" },
-        { model: "MOJO 90", season: "SS24", mold: "PAOS 58", tgl: "2023-02-16", ket: "REVIEW 12/09/2023" },
-        { model: "NORTH", season: "FH24", mold: "PAOS 59", tgl: "2023-07-14", ket: "MOVE FROM SS24" }
-    ];
+    const firebaseConfig = {
+        apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
+        authDomain: "umk-monitoring.firebaseapp.com",
+        projectId: "umk-monitoring",
+        storageBucket: "umk-monitoring.firebasestorage.app",
+        messagingSenderId: "483335867373",
+        appId: "1:483335867373:web:5d4c8d3ec97328374835e4"
+    };
 
-    let database = JSON.parse(localStorage.getItem('umk_db')) || dataDefault;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
     let chartInstance = null;
 
-    function login() {
-        if(userInput.value !== "" && passInput.value !== "") {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('menuSelection').style.display = 'flex';
+    const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
+
+    // NAVIGASI
+    function bukaHalamanInput() {
+        document.getElementById("menuSelection").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+    }
+
+    function kembaliKeMenu() {
+        document.getElementById("mainContent").style.display = "none";
+        document.getElementById("menuSelection").style.display = "flex";
+    }
+
+    function login() { 
+        auth.signInWithEmailAndPassword(formatEmail(userInput.value), passInput.value).catch(() => alert("Gagal Login!")); 
+    }
+    
+    function daftar() {
+        if(passInput.value.length < 6) return alert("Password minimal 6 karakter!");
+        auth.createUserWithEmailAndPassword(formatEmail(userInput.value), passInput.value)
+            .then(() => alert("Berhasil Terdaftar! Klik SIGN IN.")).catch(err => alert(err.message));
+    }
+
+    function logout() { auth.signOut().then(() => location.reload()); }
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("menuSelection").style.display = "flex"; // Tampilkan menu dulu
+            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
+            muatData();
         }
-    }
+    });
 
-    function bukaDashboard() {
-        document.getElementById('menuSelection').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-        muatTabel();
-    }
-
-    function kembaliMenu() {
-        document.getElementById('mainContent').style.display = 'none';
-        document.getElementById('menuSelection').style.display = 'flex';
-    }
-
-    function simpanData() {
-        const id = document.getElementById('editId').value;
-        const baru = {
-            model: model.value,
-            season: season.value,
-            mold: mold.value,
-            tgl: tgl.value,
-            ket: keterangan.value
+    // LOGIKA DATA (Firestore)
+    async function simpanData() {
+        const id = document.getElementById("editId").value;
+        const data = { 
+            model: model.value, 
+            vendor: vendor.value, 
+            season: season.value, 
+            tglKirim: tglKirim.value, 
+            keterangan: keterangan.value, 
+            waktu: firebase.firestore.FieldValue.serverTimestamp() 
         };
-
-        if(id === "") {
-            database.unshift(baru);
-        } else {
-            database[id] = baru;
-            document.getElementById('editId').value = "";
-            document.getElementById('btnAction').innerText = "SIMPAN DATA";
-            document.getElementById('btnAction').style.background = "var(--success)";
-        }
-
-        localStorage.setItem('umk_db', JSON.stringify(database));
+        if(!model.value || !vendor.value || !tglKirim.value) return alert("Mohon lengkapi data!");
+        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
         resetForm();
-        muatTabel();
-    }
-
-    function muatTabel() {
-        const body = document.getElementById('tableBody');
-        const filter = document.getElementById('cari').value.toLowerCase();
-        body.innerHTML = "";
-        
-        let stats = {};
-
-        database.forEach((d, i) => {
-            if(d.model.toLowerCase().includes(filter)) {
-                stats[d.season] = (stats[d.season] || 0) + 1;
-                body.innerHTML += `<tr>
-                    <td>${i+1}</td>
-                    <td><b>${d.model}</b></td>
-                    <td>${d.season}</td>
-                    <td>${d.mold}</td>
-                    <td>${d.tgl}</td>
-                    <td>${d.ket}</td>
-                    <td>
-                        <a href="#" onclick="edit(${i})" style="color:var(--warning)">Edit</a> | 
-                        <a href="#" onclick="hapus(${i})" style="color:var(--danger)">Hapus</a>
-                    </td>
-                </tr>`;
-            }
-        });
-        updateChart(stats);
-    }
-
-    function edit(i) {
-        const d = database[i];
-        document.getElementById('editId').value = i;
-        model.value = d.model;
-        season.value = d.season;
-        mold.value = d.mold;
-        tgl.value = d.tgl;
-        keterangan.value = d.ket;
-        document.getElementById('btnAction').innerText = "UPDATE DATA";
-        document.getElementById('btnAction').style.background = "var(--warning)";
-    }
-
-    function hapus(i) {
-        if(confirm("Hapus data?")) {
-            database.splice(i, 1);
-            localStorage.setItem('umk_db', JSON.stringify(database));
-            muatTabel();
-        }
     }
 
     function resetForm() {
-        model.value = ""; mold.value = ""; tgl.value = ""; keterangan.value = "";
+        document.getElementById("editId").value = "";
+        model.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
+        document.getElementById("btnAction").innerText = "SIMPAN DATA";
+        document.getElementById("btnAction").style.background = "#16a34a";
     }
 
-    function updateChart(stats) {
-        const ctx = document.getElementById('myChart').getContext('2d');
+    function muatData() {
+        db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
+            let html = ""; let i = 1; let vendorCounts = {}; let total = 0;
+            snapshot.forEach(doc => {
+                let d = doc.data();
+                vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
+                total++;
+                let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
+                
+                html += `<tr>
+                    <td>${i++}</td>
+                    <td>${d.model}</td>
+                    <td>${d.vendor}</td>
+                    <td>${d.season}</td>
+                    <td>${displayDate}</td>
+                    <td>${d.keterangan || '-'}</td>
+                    <td>
+                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
+                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById("tableBody").innerHTML = html;
+            renderChart(vendorCounts, total);
+        });
+    }
+
+    function renderChart(data, total) {
+        const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
+        const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
+        const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Object.keys(stats),
-                datasets: [{ label: 'Jumlah Model', data: Object.values(stats), backgroundColor: '#2563eb' }]
+                labels: Object.keys(data),
+                datasets: [{ label: 'Persentase (%)', data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), backgroundColor: backgroundColors, borderRadius: 4 }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}% dari total data` } } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } }
             }
         });
     }
 
-    function exportExcel() {
-        const ws = XLSX.utils.json_to_sheet(database);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data");
-        XLSX.writeFile(wb, "Data_Unimitra.xlsx");
+    function persiapkanEdit(id, m, v, s, k, t) {
+        document.getElementById("editId").value = id;
+        model.value = m; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
+        tglKirim.value = t || "";
+        document.getElementById("btnAction").innerText = "UPDATE DATA";
+        document.getElementById("btnAction").style.background = "#f59e0b";
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    // Handle Import Excel
-    document.getElementById('uploadExcel').addEventListener('change', function(e) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            
-            const imported = json.map(row => ({
-                model: row.MODEL || row.Model || "Tanpa Nama",
-                season: row.SEASON || row.Season || "SS24",
-                mold: row.MOLD || row.Last || "-",
-                tgl: row.DATE || row.Tanggal || "",
-                ket: row.KETERANGAN || row.Ket || ""
-            }));
+    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
 
-            database = [...imported, ...database];
-            localStorage.setItem('umk_db', JSON.stringify(database));
-            muatTabel();
-            alert("Import Berhasil!");
-        };
-        reader.readAsArrayBuffer(e.target.files[0]);
-    });
+    function cariData() {
+        let val = searchInput.value.toLowerCase();
+        let rows = tableBody.getElementsByTagName("tr");
+        for (let row of rows) row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
+    }
+
+    function downloadExcel() {
+        const wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
+        XLSX.writeFile(wb, "Laporan_Unimitra.xlsx");
+    }
 </script>
 </body>
 </html>
