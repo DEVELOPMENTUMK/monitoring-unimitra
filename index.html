@@ -26,10 +26,8 @@
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
 
-        /* MENU SELECTION STYLE */
-        #menuSelection {
-            height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9;
-        }
+        /* MENU SELECTION */
+        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
         .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         .menu-card {
             background: white; width: 220px; padding: 30px; border-radius: 15px; text-align: center;
@@ -56,7 +54,6 @@
         .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
 
-        .search-container { margin-bottom: 10px; }
         .search-input { width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -122,8 +119,8 @@
                     <div><label>Desainer</label><input type="text" id="desainer" placeholder="Nama Desainer"></div>
                 </div>
                 <div class="input-grid">
-                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
                     <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
+                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
                 </div>
                 <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
 
@@ -151,8 +148,8 @@
                         <th>No</th>
                         <th>Model</th>
                         <th>Desainer</th>
-                        <th>Vendor</th>
                         <th>Season</th>
+                        <th>Vendor</th>
                         <th>Tgl Kirim</th>
                         <th>Keterangan</th>
                         <th>Aksi</th>
@@ -248,8 +245,8 @@
                     <td>${i++}</td>
                     <td><b>${d.model}</b></td>
                     <td>${d.desainer || '-'}</td>
-                    <td>${d.vendor}</td>
                     <td>${d.season}</td>
+                    <td>${d.vendor}</td>
                     <td>${displayDate}</td>
                     <td>${d.keterangan || '-'}</td>
                     <td>
