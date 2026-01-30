@@ -25,6 +25,8 @@
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+        .forgot-link { display: block; margin-top: 15px; font-size: 12px; color: #64748b; text-decoration: none; cursor: pointer; }
+        .forgot-link:hover { color: var(--primary); text-decoration: underline; }
 
         /* MENU SELECTION */
         #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
@@ -75,6 +77,9 @@
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
         <button onclick="login()" class="btn-login">SIGN IN</button>
+        
+        <a onclick="lupaPassword()" class="forgot-link">Lupa Password?</a>
+        
         <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
 </div>
@@ -198,6 +203,16 @@
             .then(() => alert("Berhasil Terdaftar! Klik SIGN IN.")).catch(err => alert(err.message));
     }
 
+    // FUNGSI LUPA PASSWORD
+    function lupaPassword() {
+        const email = formatEmail(userInput.value);
+        if(!userInput.value) return alert("Masukkan Username terlebih dahulu!");
+        
+        auth.sendPasswordResetEmail(email)
+            .then(() => alert("Email reset password telah dikirim ke: " + email + "\nCek inbox atau spam."))
+            .catch(err => alert("Gagal: " + err.message));
+    }
+
     function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(user => {
@@ -260,14 +275,11 @@
         });
     }
 
-    // Fungsi Grafik yang sudah dimodifikasi untuk menampilkan Nama + Jumlah Model
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
         
-        // Buat Label Custom (Vendor + Jumlah)
         const customLabels = Object.keys(data).map(v => `${v} (${data[v]} Model)`);
-
         const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
         const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
 
