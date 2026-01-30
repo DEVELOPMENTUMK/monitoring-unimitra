@@ -62,6 +62,10 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
 
+        /* STYLE KHUSUS UNTUK DATA DROP */
+        .row-drop { color: var(--danger) !important; font-weight: bold; }
+        .row-drop td { color: var(--danger) !important; }
+
         @media print {
             .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .search-container, td:last-child, th:last-child { display: none !important; }
             .card { border: none; box-shadow: none; width: 100%; }
@@ -77,9 +81,7 @@
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
         <button onclick="login()" class="btn-login">SIGN IN</button>
-        
         <a onclick="lupaPassword()" class="forgot-link">Lupa Password?</a>
-        
         <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
 </div>
@@ -129,7 +131,7 @@
                 </div>
                 <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
 
-                <textarea id="keterangan" placeholder="Keterangan tambahan..."></textarea>
+                <textarea id="keterangan" placeholder="Keterangan tambahan... (Ketik 'DROP' untuk tanda merah)"></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
             </div>
 
@@ -203,13 +205,11 @@
             .then(() => alert("Berhasil Terdaftar! Klik SIGN IN.")).catch(err => alert(err.message));
     }
 
-    // FUNGSI LUPA PASSWORD
     function lupaPassword() {
         const email = formatEmail(userInput.value);
         if(!userInput.value) return alert("Masukkan Username terlebih dahulu!");
-        
         auth.sendPasswordResetEmail(email)
-            .then(() => alert("Email reset password telah dikirim ke: " + email + "\nCek inbox atau spam."))
+            .then(() => alert("Email reset password telah dikirim ke: " + email))
             .catch(err => alert("Gagal: " + err.message));
     }
 
@@ -256,7 +256,11 @@
                 total++;
                 let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
                 
-                html += `<tr>
+                // LOGIKA WARNA MERAH JIKA ADA KATA 'DROP'
+                let isDrop = d.keterangan && d.keterangan.toUpperCase().includes("DROP");
+                let rowClass = isDrop ? "row-drop" : "";
+                
+                html += `<tr class="${rowClass}">
                     <td>${i++}</td>
                     <td><b>${d.model}</b></td>
                     <td>${d.desainer || '-'}</td>
@@ -278,11 +282,9 @@
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
-        
         const customLabels = Object.keys(data).map(v => `${v} (${data[v]} Model)`);
         const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
         const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
-
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -296,18 +298,7 @@
             },
             options: {
                 responsive: true,
-                plugins: { 
-                    legend: { display: false }, 
-                    tooltip: { 
-                        callbacks: { 
-                            label: (ctx) => {
-                                const vendorName = Object.keys(data)[ctx.dataIndex];
-                                const count = data[vendorName];
-                                return ` ${ctx.raw}% (${count} Model)`;
-                            } 
-                        } 
-                    } 
-                },
+                plugins: { legend: { display: false } },
                 scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } }
             }
         });
@@ -315,7 +306,8 @@
 
     function persiapkanEdit(id, m, ds, v, s, k, t) {
         document.getElementById("editId").value = id;
-        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; keterangan.value = (k === 'undefined' ? '' : k);
+        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; 
+        keterangan.value = (k === 'undefined' || k === 'null') ? '' : k;
         tglKirim.value = t || "";
         document.getElementById("btnAction").innerText = "UPDATE DATA";
         document.getElementById("btnAction").style.background = "#f59e0b";
