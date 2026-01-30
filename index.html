@@ -62,7 +62,6 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
 
-        /* STYLE KHUSUS UNTUK DATA DROP */
         .row-drop { color: var(--danger) !important; font-weight: bold; }
         .row-drop td { color: var(--danger) !important; }
 
@@ -89,15 +88,15 @@
 <div id="menuSelection">
     <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
     <div class="menu-container">
-        <div class="menu-card" onclick="bukaHalamanInput()">
+        <div class="menu-card" onclick="bukaHalaman('vendor')">
             <div class="menu-icon">📝</div>
             <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
             <p style="font-size: 12px; color: #64748b;">Monitoring Development</p>
         </div>
-        <div class="menu-card" style="opacity: 0.6; cursor: not-allowed;">
+        <div class="menu-card" onclick="bukaHalaman('commers')">
             <div class="menu-icon">📊</div>
-            <h3 style="margin:0;">Commers</h3>
-            <p style="font-size: 12px;">(Segera Hadir)</p>
+            <h3 style="margin:0; color: #7c3aed;">Commers</h3>
+            <p style="font-size: 12px; color: #64748b;">Monitoring Commercial</p>
         </div>
     </div>
     <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b;">Keluar / Logout</button>
@@ -107,7 +106,7 @@
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
             <button onclick="kembaliKeMenu()" class="btn-tool" style="margin:0;">🏠 Menu</button>
-            <h2 style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
+            <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
         </div>
         <div style="display:flex; align-items:center; gap:15px;">
             <span id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></span>
@@ -118,7 +117,7 @@
     <div class="main-container">
         <div class="flex-row">
             <div class="card form-side">
-                <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
+                <h3 style="margin-top:0; font-size: 15px;">Form Data Entry (<span id="formMode">Vendor</span>)</h3>
                 <input type="hidden" id="editId">
                 
                 <div class="input-grid">
@@ -127,16 +126,16 @@
                 </div>
                 <div class="input-grid">
                     <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
-                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
+                    <div><label>Vendor/Client</label><input type="text" id="vendor" placeholder="Input Nama"></div>
                 </div>
                 <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
 
-                <textarea id="keterangan" placeholder="Ketik 'DROP' di sini untuk memberi tanda merah pada baris."></textarea>
+                <textarea id="keterangan" placeholder=""></textarea>
                 <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
             </div>
 
             <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor (%)</h3>
+                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Item (%)</h3>
                 <canvas id="vendorChart" style="max-height: 180px;"></canvas>
             </div>
         </div>
@@ -156,7 +155,7 @@
                         <th>Model</th>
                         <th>Desainer</th>
                         <th>Season</th>
-                        <th>Vendor</th>
+                        <th>Vendor/Client</th>
                         <th>Tgl Kirim</th>
                         <th>Aksi</th>
                     </tr>
@@ -168,6 +167,7 @@
 </div>
 
 <script>
+    // FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
@@ -180,20 +180,33 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    
     let chartInstance = null;
+    let currentMode = 'vendor'; // 'vendor' atau 'commers'
+    let unsubscribe = null; // Untuk mematikan listener real-time saat ganti halaman
 
     const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
 
-    function bukaHalamanInput() {
+    // NAVIGATION
+    function bukaHalaman(mode) {
+        currentMode = mode;
         document.getElementById("menuSelection").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
+        document.getElementById("formMode").innerText = mode === 'vendor' ? 'Vendor' : 'Commers';
+        document.getElementById("pageTitle").innerText = mode === 'vendor' ? 'UMK - VENDOR MONITORING' : 'UMK - COMMERS MONITORING';
+        document.getElementById("pageTitle").style.color = mode === 'vendor' ? '#2563eb' : '#7c3aed';
+        
+        resetForm();
+        muatData();
     }
 
     function kembaliKeMenu() {
+        if(unsubscribe) unsubscribe();
         document.getElementById("mainContent").style.display = "none";
         document.getElementById("menuSelection").style.display = "flex";
     }
 
+    // AUTH
     function login() { 
         auth.signInWithEmailAndPassword(formatEmail(userInput.value), passInput.value).catch(() => alert("Gagal Login!")); 
     }
@@ -219,12 +232,14 @@
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("menuSelection").style.display = "flex";
             document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
-            muatData();
         }
     });
 
+    // CRUD LOGIC
     async function simpanData() {
         const id = document.getElementById("editId").value;
+        const collectionName = currentMode === 'vendor' ? "data_unimitra" : "data_commers";
+        
         const data = { 
             model: model.value, 
             desainer: desainer.value,
@@ -234,28 +249,29 @@
             keterangan: keterangan.value, 
             waktu: firebase.firestore.FieldValue.serverTimestamp() 
         };
+        
         if(!model.value || !vendor.value || !tglKirim.value) return alert("Mohon lengkapi data!");
-        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
-        resetForm();
-    }
-
-    function resetForm() {
-        document.getElementById("editId").value = "";
-        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
-        document.getElementById("btnAction").innerText = "SIMPAN DATA";
-        document.getElementById("btnAction").style.background = "#16a34a";
+        
+        try {
+            id ? await db.collection(collectionName).doc(id).update(data) : await db.collection(collectionName).add(data);
+            resetForm();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
     }
 
     function muatData() {
-        db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = ""; let i = 1; let vendorCounts = {}; let total = 0;
+        if(unsubscribe) unsubscribe();
+        const collectionName = currentMode === 'vendor' ? "data_unimitra" : "data_commers";
+
+        unsubscribe = db.collection(collectionName).orderBy("waktu", "desc").onSnapshot(snapshot => {
+            let html = ""; let i = 1; let counts = {}; let total = 0;
             snapshot.forEach(doc => {
                 let d = doc.data();
-                vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
+                counts[d.vendor] = (counts[d.vendor] || 0) + 1;
                 total++;
                 let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
                 
-                // LOGIKA WARNA MERAH JIKA ADA KATA 'DROP' (Meskipun teksnya disembunyikan)
                 let isDrop = d.keterangan && d.keterangan.toUpperCase().includes("DROP");
                 let rowClass = isDrop ? "row-drop" : "";
                 
@@ -273,16 +289,40 @@
                 </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
-            renderChart(vendorCounts, total);
+            renderChart(counts, total);
         });
     }
 
+    function resetForm() {
+        document.getElementById("editId").value = "";
+        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
+        document.getElementById("btnAction").innerText = "SIMPAN DATA";
+        document.getElementById("btnAction").style.background = "#16a34a";
+    }
+
+    function persiapkanEdit(id, m, ds, v, s, k, t) {
+        document.getElementById("editId").value = id;
+        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; 
+        keterangan.value = (k === 'undefined' || k === 'null') ? '' : k;
+        tglKirim.value = t || "";
+        document.getElementById("btnAction").innerText = "UPDATE DATA";
+        document.getElementById("btnAction").style.background = "#f59e0b";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function hapus(id) { 
+        const collectionName = currentMode === 'vendor' ? "data_unimitra" : "data_commers";
+        if(confirm("Hapus data ini?")) db.collection(collectionName).doc(id).delete(); 
+    }
+
+    // UTILS
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
-        const customLabels = Object.keys(data).map(v => `${v} (${data[v]} Model)`);
+        const customLabels = Object.keys(data).map(v => `${v} (${data[v]})`);
         const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
         const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
+        
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -302,19 +342,6 @@
         });
     }
 
-    function persiapkanEdit(id, m, ds, v, s, k, t) {
-        document.getElementById("editId").value = id;
-        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; 
-        // Keterangan tetap dimuat ke form saat edit agar bisa diubah
-        keterangan.value = (k === 'undefined' || k === 'null') ? '' : k;
-        tglKirim.value = t || "";
-        document.getElementById("btnAction").innerText = "UPDATE DATA";
-        document.getElementById("btnAction").style.background = "#f59e0b";
-        window.scrollTo({top: 0, behavior: 'smooth'});
-    }
-
-    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
-
     function cariData() {
         let val = searchInput.value.toLowerCase();
         let rows = tableBody.getElementsByTagName("tr");
@@ -322,8 +349,9 @@
     }
 
     function downloadExcel() {
+        const fileName = currentMode === 'vendor' ? "Laporan_Vendor.xlsx" : "Laporan_Commers.xlsx";
         const wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
-        XLSX.writeFile(wb, "Laporan_Unimitra.xlsx");
+        XLSX.writeFile(wb, fileName);
     }
 </script>
 </body>
