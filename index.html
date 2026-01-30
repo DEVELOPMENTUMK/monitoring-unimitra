@@ -3,215 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Kerja Harian - Arif Setiawan</title>
+    <title>UNIMITRA - Cloud Monitoring</title>
     
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
-        /* Gaya Visual Utama */
-        body { font-family: 'Times New Roman', Times, serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .wrapper { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
         
-        /* Header Form */
-        .no-print h2 { text-align: center; color: #1a73e8; margin-top: 0; }
-        .input-section { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 30px; }
+        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%); display:flex; justify-content:center; align-items:center; z-index:2000; }
+        .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         
-        /* Grid Input */
-        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
-        textarea { height: 60px; resize: vertical; }
+        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
+        .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .menu-card { background: white; width: 220px; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+        .menu-card:hover { transform: translateY(-5px); }
 
-        /* Tombol */
-        .btn-area { display: flex; gap: 10px; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-save { background: #28a745; color: white; flex: 2; }
-        .btn-word { background: #2b5797; color: white; }
-        .btn-print { background: #333; color: white; }
-        button:hover { opacity: 0.8; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .main-container { padding: 20px; max-width: 1250px; margin: auto; }
+        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
+        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        .form-side { width: 400px; }
+        .chart-side { flex: 1; min-width: 320px; }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        input { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
+        label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
 
-        /* Desain Dokumen (Sesuai Gambar) */
-        .doc-header { margin-bottom: 20px; line-height: 1.2; }
-        .doc-header p { margin: 5px 0; font-size: 16px; }
-        .title-jurnal { text-align: center; text-decoration: underline; margin: 20px 0; font-size: 20px; font-weight: bold; }
+        /* Style untuk checkbox DROP */
+        .drop-container { display: flex; align-items: center; gap: 10px; background: #fff1f2; padding: 10px; border-radius: 8px; border: 1px solid #fecdd3; margin-top: 10px; cursor: pointer; }
+        .drop-container input { width: auto; cursor: pointer; }
+        .drop-label { font-size: 13px; color: #be123c; font-weight: bold; cursor: pointer; }
 
-        /* Tabel Sesuai Gambar */
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; vertical-align: top; }
-        th { background: #eeeeee; text-align: center; }
-        
-        /* Fitur Baris DROP (Merah) */
-        .row-drop { background-color: #ffcccc !important; color: #b71c1c; font-weight: bold; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
 
-        /* Aksi */
-        .actions { display: flex; gap: 5px; justify-content: center; }
-        .btn-edit { background: #ffc107; padding: 4px 8px; font-size: 11px; border-radius: 3px; }
-        .btn-delete { background: #dc3545; color: white; padding: 4px 8px; font-size: 11px; border-radius: 3px; }
+        .row-drop { background-color: #fff1f2 !important; color: var(--danger) !important; font-weight: bold; }
+        .row-drop td { color: var(--danger) !important; }
 
-        /* Pengaturan Print */
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            .wrapper { box-shadow: none; width: 100%; padding: 0; }
-            th { background: #eee !important; -webkit-print-color-adjust: exact; }
-            .row-drop { background-color: #ffcccc !important; -webkit-print-color-adjust: exact; }
-        }
+        @media print { .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .search-input, td:last-child, th:last-child { display: none !important; } }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="no-print">
-        <h2>Menu Commers - Input Jurnal</h2>
-        <div class="input-section">
-            <input type="hidden" id="editIndex" value="-1">
-            <div class="grid-input">
-                <div>
-                    <label>Tanggal</label>
-                    <input type="date" id="tgl">
-                </div>
-                <div>
-                    <label>Proyek</label>
-                    <input type="text" id="proy" placeholder="Nama proyek...">
-                </div>
-            </div>
-            <div class="grid-input">
-                <div>
-                    <label>Detail Pekerjaan</label>
-                    <textarea id="kerj" placeholder="Apa yang dikerjakan..."></textarea>
-                </div>
-                <div>
-                    <label>Catatan</label>
-                    <textarea id="catat" placeholder=""></textarea>
-                </div>
-            </div>
-            <div class="btn-area">
-                <button class="btn-save" onclick="olahData()">SIMPAN KE TABEL</button>
-                <button class="btn-word" onclick="exportWord()">SIMPAN KE WORD</button>
-                <button class="btn-print" onclick="window.print()">PRINT</button>
-            </div>
-        </div>
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2>PT.UNIMITRA KHARISMA</h2>
+        <input type="text" id="userInput" placeholder="Username">
+        <input type="password" id="passInput" placeholder="Password">
+        <button onclick="login()" class="btn-login">SIGN IN</button>
+    </div>
+</div>
+
+<div id="menuSelection">
+    <div class="menu-container">
+        <div class="menu-card" onclick="bukaHalamanInput()"><h3>📝 Input Data Vendor</h3></div>
+    </div>
+</div>
+
+<div id="mainContent" style="display:none;">
+    <div class="header">
+        <button onclick="kembaliKeMenu()" class="btn-tool">🏠 Menu</button>
+        <div id="userTag"></div>
+        <button onclick="logout()" class="btn">Logout</button>
     </div>
 
-    <div id="dokumenArea">
-        <div class="doc-header">
-            <p>Nama &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Arif Setiawan</p>
-            <p>NIK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 2040412</p>
-            <p>Bagian &nbsp;&nbsp;&nbsp;: Development</p>
+    <div class="main-container">
+        <div class="flex-row">
+            <div class="card form-side">
+                <h3 style="margin-top:0;">Form Data Entry</h3>
+                <input type="hidden" id="editId">
+                <div class="input-grid">
+                    <div><label>Model</label><input type="text" id="model"></div>
+                    <div><label>Desainer</label><input type="text" id="desainer"></div>
+                </div>
+                <div class="input-grid">
+                    <div><label>Season</label><input type="text" id="season"></div>
+                    <div><label>Vendor</label><input type="text" id="vendor"></div>
+                </div>
+                <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
+
+                <label class="drop-container">
+                    <input type="checkbox" id="isDropCheck">
+                    <span class="drop-label">Tandai sebagai DROP (Baris Merah)</span>
+                </label>
+
+                <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
+            </div>
+
+            <div class="card chart-side">
+                <canvas id="vendorChart"></canvas>
+            </div>
         </div>
 
-        <div class="title-jurnal">JURNAL KERJA HARIAN 2026</div>
-
-        <table id="tabelJurnal">
-            <thead>
-                <tr>
-                    <th width="40">No.</th>
-                    <th width="120">Tanggal</th>
-                    <th>Proyek dan Detail Pekerjaan</th>
-                    <th width="200">Catatan</th>
-                    <th width="100" class="no-print">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="isiTabel">
-                </tbody>
-        </table>
+        <div class="card">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Model</th>
+                        <th>Desainer</th>
+                        <th>Season</th>
+                        <th>Vendor</th>
+                        <th>Tgl Kirim</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // Inisialisasi Data dari Penyimpanan Browser
-    let listJurnal = JSON.parse(localStorage.getItem('db_jurnal_2026')) || [];
+    const firebaseConfig = {
+        apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
+        authDomain: "umk-monitoring.firebaseapp.com",
+        projectId: "umk-monitoring",
+        storageBucket: "umk-monitoring.firebasestorage.app",
+        messagingSenderId: "483335867373",
+        appId: "1:483335867373:web:5d4c8d3ec97328374835e4"
+    };
 
-    function tampilkanData() {
-        const tabel = document.getElementById('isiTabel');
-        tabel.innerHTML = '';
-        
-        listJurnal.forEach((data, i) => {
-            // Logika Baris Merah jika ada kata "DROP"
-            const statusDrop = data.catatan.toUpperCase().includes('DROP') ? 'row-drop' : '';
-            
-            tabel.innerHTML += `
-                <tr class="${statusDrop}">
-                    <td align="center">${i + 1}</td>
-                    <td align="center">${formatTanggal(data.tanggal)}</td>
-                    <td><b>${data.proyek}</b><br>${data.pekerjaan}</td>
-                    <td>${data.catatan}</td>
-                    <td class="no-print actions">
-                        <button class="btn-edit" onclick="siapkanEdit(${i})">Edit</button>
-                        <button class="btn-delete" onclick="hapusData(${i})">Hapus</button>
-                    </td>
-                </tr>
-            `;
-        });
-        localStorage.setItem('db_jurnal_2026', JSON.stringify(listJurnal));
-    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    let chartInstance = null;
 
-    function olahData() {
-        const idx = document.getElementById('editIndex').value;
-        const info = {
-            tanggal: document.getElementById('tgl').value,
-            proyek: document.getElementById('proy').value,
-            pekerjaan: document.getElementById('kerj').value,
-            catatan: document.getElementById('catat').value
+    function bukaHalamanInput() { document.getElementById("menuSelection").style.display = "none"; document.getElementById("mainContent").style.display = "block"; }
+    function kembaliKeMenu() { document.getElementById("mainContent").style.display = "none"; document.getElementById("menuSelection").style.display = "flex"; }
+    function login() { auth.signInWithEmailAndPassword(userInput.value + "@unimitra.com", passInput.value).catch(e => alert(e.message)); }
+    function logout() { auth.signOut().then(() => location.reload()); }
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("menuSelection").style.display = "flex";
+            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
+            muatData();
+        }
+    });
+
+    async function simpanData() {
+        const id = document.getElementById("editId").value;
+        const data = { 
+            model: model.value, 
+            desainer: desainer.value,
+            vendor: vendor.value, 
+            season: season.value, 
+            tglKirim: tglKirim.value, 
+            keterangan: document.getElementById("isDropCheck").checked ? "DROP" : "", // Simpan teks "DROP" jika dicentang
+            waktu: firebase.firestore.FieldValue.serverTimestamp() 
         };
-
-        if(!info.tanggal || !info.proyek) return alert("Tanggal dan Proyek wajib diisi!");
-
-        if(idx === "-1") {
-            listJurnal.push(info);
-        } else {
-            listJurnal[idx] = info;
-            document.getElementById('editIndex').value = "-1";
-        }
-
-        bersihkanForm();
-        tampilkanData();
+        if(!model.value || !vendor.value) return alert("Lengkapi data!");
+        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
+        resetForm();
     }
 
-    function siapkanEdit(i) {
-        const d = listJurnal[i];
-        document.getElementById('tgl').value = d.tanggal;
-        document.getElementById('proy').value = d.proyek;
-        document.getElementById('kerj').value = d.pekerjaan;
-        document.getElementById('catat').value = d.catatan;
-        document.getElementById('editIndex').value = i;
-        window.scrollTo(0,0);
+    function resetForm() {
+        document.getElementById("editId").value = "";
+        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; tglKirim.value = "";
+        document.getElementById("isDropCheck").checked = false;
+        document.getElementById("btnAction").innerText = "SIMPAN DATA";
     }
 
-    function hapusData(i) {
-        if(confirm("Hapus baris ini?")) {
-            listJurnal.splice(i, 1);
-            tampilkanData();
-        }
+    function muatData() {
+        db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
+            let html = ""; let i = 1; let vendorCounts = {}; let total = 0;
+            snapshot.forEach(doc => {
+                let d = doc.data();
+                vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
+                total++;
+                let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
+                
+                let isDrop = d.keterangan === "DROP";
+                let rowClass = isDrop ? "row-drop" : "";
+                
+                html += `<tr class="${rowClass}">
+                    <td>${i++}</td>
+                    <td><b>${d.model}</b></td>
+                    <td>${d.desainer || '-'}</td>
+                    <td>${d.season}</td>
+                    <td>${d.vendor}</td>
+                    <td>${displayDate}</td>
+                    <td>
+                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.desainer}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer;">Edit</span>
+                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; margin-left:10px;">Hapus</span>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById("tableBody").innerHTML = html;
+            renderChart(vendorCounts, total);
+        });
     }
 
-    function bersihkanForm() {
-        document.getElementById('tgl').value = '';
-        document.getElementById('proy').value = '';
-        document.getElementById('kerj').value = '';
-        document.getElementById('catat').value = '';
+    function renderChart(data, total) {
+        const ctx = document.getElementById('vendorChart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{ label: '%', data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), backgroundColor: '#2563eb' }]
+            }
+        });
     }
 
-    function formatTanggal(tgl) {
-        if(!tgl) return "";
-        const part = tgl.split('-');
-        return `${part[2]}/${part[1]}/${part[0]}`;
+    function persiapkanEdit(id, m, ds, v, s, k, t) {
+        document.getElementById("editId").value = id;
+        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; tglKirim.value = t;
+        document.getElementById("isDropCheck").checked = (k === "DROP");
+        document.getElementById("btnAction").innerText = "UPDATE DATA";
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    // Fungsi Export ke Word (Metode Blob)
-    function exportWord() {
-        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export Word</title><style>table{border-collapse:collapse; width:100%;} th,td{border:1px solid black; padding:5px;} .row-drop{background-color:#ffcccc;}</style></head><body>";
-        const footer = "</body></html>";
-        const html = header + document.getElementById('dokumenArea').innerHTML + footer;
-
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'Jurnal_Kerja_ArifSetiawan_2026.doc';
-        link.click();
-    }
-
-    // Jalankan saat pertama buka
-    tampilkanData();
+    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
 </script>
-
 </body>
 </html>
