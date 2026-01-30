@@ -3,330 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIMITRA - Cloud Monitoring</title>
+    <title>Sistem Input Jurnal Kerja</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
         
-        /* LOGIN OVERLAY */
-        #loginOverlay { 
-            position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
-            display:flex; justify-content:center; align-items:center; z-index:2000; 
-        }
-        .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
-        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
-        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
-        .forgot-link { display: block; margin-top: 15px; font-size: 12px; color: #64748b; text-decoration: none; cursor: pointer; }
-        .forgot-link:hover { color: var(--primary); text-decoration: underline; }
-
-        /* MENU SELECTION */
-        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
-        .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .menu-card {
-            background: white; width: 220px; padding: 30px; border-radius: 15px; text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .menu-icon { font-size: 50px; margin-bottom: 15px; }
-
-        /* DASHBOARD STYLE */
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .main-container { padding: 20px; max-width: 1250px; margin: auto; }
-        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
-        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        /* Form Styling */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        textarea { height: 80px; resize: vertical; }
         
-        .form-side { width: 400px; }
-        .chart-side { flex: 1; min-width: 320px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: #28a745; color: white; flex: 2; }
+        .btn-word { background: #007bff; color: white; flex: 1; }
+        .btn-print { background: #6c757d; color: white; flex: 1; }
+        button:hover { opacity: 0.8; }
+
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; color: #333; }
+        .row-drop { background-color: #ffebee !important; color: #c62828; }
         
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
-        textarea { height: 50px; resize: none; margin-top: 8px; }
-        label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
+        .action-btns { display: flex; gap: 5px; }
+        .edit-btn { background: #ffc107; color: black; padding: 5px 10px; font-size: 12px; }
+        .del-btn { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
 
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
-
-        .search-input { width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
-
-        /* STYLE KHUSUS UNTUK DATA DROP */
-        .row-drop { color: var(--danger) !important; font-weight: bold; }
-        .row-drop td { color: var(--danger) !important; }
-
-        @media print {
-            .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .search-container, td:last-child, th:last-child { display: none !important; }
-            .card { border: none; box-shadow: none; width: 100%; }
-        }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="login-card">
-        <h2 style="margin:0;">PT.UNIMITRA KHARISMA</h2>
-        <p style="margin-top:5px; font-size: 13px; color:#64748b;">Development Monitoring System</p>
-        <input type="text" id="userInput" placeholder="Username">
-        <input type="password" id="passInput" placeholder="Password">
-        <button onclick="login()" class="btn-login">SIGN IN</button>
-        <a onclick="lupaPassword()" class="forgot-link">Lupa Password?</a>
-        <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
-    </div>
-</div>
-
-<div id="menuSelection">
-    <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
-    <div class="menu-container">
-        <div class="menu-card" onclick="bukaHalamanInput()">
-            <div class="menu-icon">📝</div>
-            <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
-            <p style="font-size: 12px; color: #64748b;">Monitoring Development</p>
-        </div>
-        <div class="menu-card" style="opacity: 0.6; cursor: not-allowed;">
-            <div class="menu-icon">📊</div>
-            <h3 style="margin:0;">Commers</h3>
-            <p style="font-size: 12px;">(Segera Hadir)</p>
-        </div>
-    </div>
-    <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b;">Keluar / Logout</button>
-</div>
-
-<div id="mainContent" style="display:none;">
-    <div class="header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliKeMenu()" class="btn-tool" style="margin:0;">🏠 Menu</button>
-            <h2 style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
-        </div>
-        <div style="display:flex; align-items:center; gap:15px;">
-            <span id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></span>
-            <button onclick="logout()" class="btn" style="background:#f1f5f9; color:#64748b;">Logout</button>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="flex-row">
-            <div class="card form-side">
-                <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
-                <input type="hidden" id="editId">
-                
-                <div class="input-grid">
-                    <div><label>Model</label><input type="text" id="model" placeholder="Input Model"></div>
-                    <div><label>Desainer</label><input type="text" id="desainer" placeholder="Nama Desainer"></div>
-                </div>
-                <div class="input-grid">
-                    <div><label>Season</label><input type="text" id="season" placeholder="Season"></div>
-                    <div><label>Vendor</label><input type="text" id="vendor" placeholder="Input Vendor"></div>
-                </div>
-                <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
-
-                <textarea id="keterangan" placeholder="Keterangan"></textarea>
-                <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
+<div class="container">
+    <div class="no-print">
+        <h2>INPUT JURNAL KERJA HARIAN</h2>
+        
+        <input type="hidden" id="editIndex" value="-1">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Tanggal</label>
+                <input type="date" id="tanggal">
             </div>
-
-            <div class="card chart-side">
-                <h3 style="margin-top:0; font-size: 15px; text-align:center;">Statistik per Vendor (%)</h3>
-                <canvas id="vendorChart" style="max-height: 180px;"></canvas>
+            <div class="form-group">
+                <label>Proyek</label>
+                <input type="text" id="proyek">
             </div>
         </div>
 
-        <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari Data..." onkeyup="cariData()">
-                <div>
-                    <button onclick="window.print()" class="btn btn-tool">Print Report</button>
-                    <button onclick="downloadExcel()" class="btn btn-tool" style="color: var(--success);">Export Excel</button>
-                </div>
-            </div>
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Model</th>
-                        <th>Desainer</th>
-                        <th>Season</th>
-                        <th>Vendor</th>
-                        <th>Tgl Kirim</th>
-                        <th>Keterangan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <div class="form-group">
+            <label>Detail Pekerjaan</label>
+            <textarea id="pekerjaan"></textarea>
         </div>
+
+        <div class="form-group">
+            <label>Catatan</label>
+            <textarea id="catatan" placeholder=""></textarea> 
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-save" onclick="simpanData()">SIMPAN DATA</button>
+            <button class="btn-word" onclick="exportToWord()">SIMPAN KE WORD</button>
+            <button class="btn-print" onclick="window.print()">PRINT</button>
+        </div>
+    </div>
+
+    <hr style="margin: 40px 0;" class="no-print">
+
+    <div id="printArea">
+        <div style="margin-bottom: 20px;">
+            <p><strong>Nama:</strong> Arif Setiawan</p>
+            <p><strong>NIK:</strong> 2040412</p>
+            <p><strong>Bagian:</strong> Development</p>
+            <h3 style="text-align: center;">JURNAL KERJA HARIAN 2026</h3>
+        </div>
+
+        <table id="dataTabel">
+            <thead>
+                <tr>
+                    <th width="50">No.</th>
+                    <th width="120">Tanggal</th>
+                    <th>Proyek dan Detail Pekerjaan</th>
+                    <th width="150">Catatan</th>
+                    <th width="120" class="no-print">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
-        authDomain: "umk-monitoring.firebaseapp.com",
-        projectId: "umk-monitoring",
-        storageBucket: "umk-monitoring.firebasestorage.app",
-        messagingSenderId: "483335867373",
-        appId: "1:483335867373:web:5d4c8d3ec97328374835e4"
-    };
+    let dataList = JSON.parse(localStorage.getItem('jurnalData')) || [];
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    let chartInstance = null;
-
-    const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
-
-    function bukaHalamanInput() {
-        document.getElementById("menuSelection").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        dataList.forEach((item, index) => {
+            const isDrop = item.catatan.toUpperCase().includes('DROP');
+            const rowClass = isDrop ? 'row-drop' : '';
+            
+            tbody.innerHTML += `
+                <tr class="${rowClass}">
+                    <td>${index + 1}</td>
+                    <td>${item.tanggal}</td>
+                    <td><strong>${item.proyek}</strong><br>${item.pekerjaan}</td>
+                    <td>${item.catatan}</td>
+                    <td class="no-print">
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="editData(${index})">Edit</button>
+                            <button class="del-btn" onclick="hapusData(${index})">Hapus</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        localStorage.setItem('jurnalData', JSON.stringify(dataList));
     }
 
-    function kembaliKeMenu() {
-        document.getElementById("mainContent").style.display = "none";
-        document.getElementById("menuSelection").style.display = "flex";
-    }
-
-    function login() { 
-        auth.signInWithEmailAndPassword(formatEmail(userInput.value), passInput.value).catch(() => alert("Gagal Login!")); 
-    }
-    
-    function daftar() {
-        if(passInput.value.length < 6) return alert("Password minimal 6 karakter!");
-        auth.createUserWithEmailAndPassword(formatEmail(userInput.value), passInput.value)
-            .then(() => alert("Berhasil Terdaftar! Klik SIGN IN.")).catch(err => alert(err.message));
-    }
-
-    function lupaPassword() {
-        const email = formatEmail(userInput.value);
-        if(!userInput.value) return alert("Masukkan Username terlebih dahulu!");
-        auth.sendPasswordResetEmail(email)
-            .then(() => alert("Email reset password telah dikirim ke: " + email))
-            .catch(err => alert("Gagal: " + err.message));
-    }
-
-    function logout() { auth.signOut().then(() => location.reload()); }
-
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById("loginOverlay").style.display = "none";
-            document.getElementById("menuSelection").style.display = "flex";
-            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
-            muatData();
-        }
-    });
-
-    async function simpanData() {
-        const id = document.getElementById("editId").value;
-        const data = { 
-            model: model.value, 
-            desainer: desainer.value,
-            vendor: vendor.value, 
-            season: season.value, 
-            tglKirim: tglKirim.value, 
-            keterangan: keterangan.value, 
-            waktu: firebase.firestore.FieldValue.serverTimestamp() 
+    function simpanData() {
+        const idx = document.getElementById('editIndex').value;
+        const newData = {
+            tanggal: document.getElementById('tanggal').value,
+            proyek: document.getElementById('proyek').value,
+            pekerjaan: document.getElementById('pekerjaan').value,
+            catatan: document.getElementById('catatan').value
         };
-        if(!model.value || !vendor.value || !tglKirim.value) return alert("Mohon lengkapi data!");
-        id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
+
+        if(!newData.tanggal || !newData.proyek) return alert("Mohon isi Tanggal dan Proyek!");
+
+        if(idx === "-1") {
+            dataList.push(newData);
+        } else {
+            dataList[idx] = newData;
+            document.getElementById('editIndex').value = "-1";
+        }
+
         resetForm();
+        renderTable();
     }
 
     function resetForm() {
-        document.getElementById("editId").value = "";
-        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
-        document.getElementById("btnAction").innerText = "SIMPAN DATA";
-        document.getElementById("btnAction").style.background = "#16a34a";
+        document.getElementById('tanggal').value = '';
+        document.getElementById('proyek').value = '';
+        document.getElementById('pekerjaan').value = '';
+        document.getElementById('catatan').value = '';
     }
 
-    function muatData() {
-        db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snapshot => {
-            let html = ""; let i = 1; let vendorCounts = {}; let total = 0;
-            snapshot.forEach(doc => {
-                let d = doc.data();
-                vendorCounts[d.vendor] = (vendorCounts[d.vendor] || 0) + 1;
-                total++;
-                let displayDate = d.tglKirim ? d.tglKirim.split('-').reverse().join('/') : '-';
-                
-                // LOGIKA WARNA MERAH JIKA ADA KATA 'DROP'
-                let isDrop = d.keterangan && d.keterangan.toUpperCase().includes("DROP");
-                let rowClass = isDrop ? "row-drop" : "";
-                
-                html += `<tr class="${rowClass}">
-                    <td>${i++}</td>
-                    <td><b>${d.model}</b></td>
-                    <td>${d.desainer || '-'}</td>
-                    <td>${d.season}</td>
-                    <td>${d.vendor}</td>
-                    <td>${displayDate}</td>
-                    <td>${d.keterangan || '-'}</td>
-                    <td>
-                        <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.desainer || ''}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
-                        <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById("tableBody").innerHTML = html;
-            renderChart(vendorCounts, total);
+    function editData(index) {
+        const item = dataList[index];
+        document.getElementById('tanggal').value = item.tanggal;
+        document.getElementById('proyek').value = item.proyek;
+        document.getElementById('pekerjaan').value = item.pekerjaan;
+        document.getElementById('catatan').value = item.catatan;
+        document.getElementById('editIndex').value = index;
+        window.scrollTo(0,0);
+    }
+
+    function hapusData(index) {
+        if(confirm("Hapus data ini?")) {
+            dataList.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // Fungsi Export ke MS Word Sederhana via Blob HTML
+    function exportToWord() {
+        const content = document.getElementById('printArea').innerHTML;
+        const source = '<html><head><meta charset="utf-8"></head><body>' + content + '</body></html>';
+        
+        const blob = new Blob(['\ufeff', source], {
+            type: 'application/msword'
         });
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Jurnal_Kerja_2026.doc';
+        link.click();
     }
 
-    function renderChart(data, total) {
-        const ctx = document.getElementById('vendorChart').getContext('2d');
-        if(chartInstance) chartInstance.destroy();
-        const customLabels = Object.keys(data).map(v => `${v} (${data[v]} Model)`);
-        const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
-        const backgroundColors = Object.keys(data).map((_, i) => colors[i % colors.length]);
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: customLabels,
-                datasets: [{ 
-                    label: 'Persentase (%)', 
-                    data: Object.values(data).map(v => ((v/total)*100).toFixed(1)), 
-                    backgroundColor: backgroundColors, 
-                    borderRadius: 4 
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + "%" } } }
-            }
-        });
-    }
-
-    function persiapkanEdit(id, m, ds, v, s, k, t) {
-        document.getElementById("editId").value = id;
-        model.value = m; desainer.value = ds; vendor.value = v; season.value = s; 
-        keterangan.value = (k === 'undefined' || k === 'null') ? '' : k;
-        tglKirim.value = t || "";
-        document.getElementById("btnAction").innerText = "UPDATE DATA";
-        document.getElementById("btnAction").style.background = "#f59e0b";
-        window.scrollTo({top: 0, behavior: 'smooth'});
-    }
-
-    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
-
-    function cariData() {
-        let val = searchInput.value.toLowerCase();
-        let rows = tableBody.getElementsByTagName("tr");
-        for (let row of rows) row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
-    }
-
-    function downloadExcel() {
-        const wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
-        XLSX.writeFile(wb, "Laporan_Unimitra.xlsx");
-    }
+    // Load data awal
+    renderTable();
 </script>
+
 </body>
 </html>
-
