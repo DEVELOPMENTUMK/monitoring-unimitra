@@ -18,6 +18,7 @@
             --danger: #ef4444; 
             --bg: #f1f5f9;
             --card-bg: #ffffff;
+            --border-color: #cbd5e1;
         }
 
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; color: #1e293b; }
@@ -62,28 +63,55 @@
         input:focus, textarea:focus { border-color: var(--primary); outline: none; background: #fff; }
         .btn { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-pdf { background: #64748b; color: white; margin-left: 10px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
         
         /* SEARCH BOX */
         .search-box { width: 300px; padding: 10px 15px; border-radius: 20px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
 
-        /* MONITORING TABLE STYLES */
+        /* TABLE STYLE */
+        .bordered-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        .bordered-table th { 
+            background: #f8fafc; 
+            border: 1px solid var(--border-color); 
+            padding: 12px; 
+            text-align: left; 
+            font-size: 11px; 
+            color: #64748b; 
+            text-transform: uppercase;
+        }
+        .bordered-table td { 
+            border: 1px solid var(--border-color); 
+            padding: 10px 12px; 
+            font-size: 13px; 
+        }
+
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
-        .static-cell { padding: 5px; min-height: 20px; }
 
         /* COMMERS STYLE */
         .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
         .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
         .jurnal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
-        .jurnal-table td { border: 1px solid #cbd5e1; padding: 12px; font-size: 13px; }
+        .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; }
 
+        /* PRINT CONFIGURATION */
         @media print {
-            .header, .form-side, .btn-tool, .no-print, .search-box, #menuSelection, #loginOverlay { display: none !important; }
-            .modern-card { border: none; box-shadow: none; width: 100%; }
-            .jurnal-table th { background: #eee !important; color: #000 !important; border: 1px solid #000; }
-            .jurnal-table td { border: 1px solid #000; }
+            body { background: white; }
+            .header, #menuSelection, #loginOverlay, .no-print, .search-box, .btn-tool, 
+            #formContainer, #chartContainer, .no-print-col { display: none !important; }
+            
+            .main-container { padding: 0; }
+            .modern-card { border: none; box-shadow: none; padding: 0; margin: 0; }
+            
+            .bordered-table { width: 100%; margin-top: 20px; }
+            .bordered-table th, .bordered-table td { border: 1px solid #000 !important; color: black !important; }
+            
+            /* Tampilkan Judul Laporan Saat Print Monitoring */
+            #printTitle { display: block !important; text-align: center; margin-bottom: 20px; }
         }
+        
+        #printTitle { display: none; }
     </style>
 </head>
 <body>
@@ -101,11 +129,11 @@
     <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
     <div class="menu-container">
         <div class="menu-card" onclick="bukaHalamanInput()">
-            <div class="menu-icon">📝</div>
+            <div class="menu-icon">??</div>
             <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
         </div>
         <div class="menu-card" onclick="bukaHalamanCommers()">
-            <div class="menu-icon">📊</div>
+            <div class="menu-icon">??</div>
             <h3 style="margin:0; color: var(--primary);">Commers</h3>
         </div>
     </div>
@@ -115,7 +143,7 @@
 <div id="mainContent" style="display:none;">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliKeMenu()" class="btn-tool">🏠 Menu</button>
+            <button onclick="kembaliKeMenu()" class="btn-tool">?? Menu</button>
             <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA</h2>
         </div>
         <div id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></div>
@@ -123,8 +151,14 @@
 
     <div class="main-container">
         <div id="uiMonitoring">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div class="modern-card" style="flex: 1; min-width: 400px;">
+            <div id="printTitle">
+                <h2 style="margin:0;">PT. UNIMITRA KHARISMA</h2>
+                <p>LAPORAN DATA PENGIRIMAN VENDOR</p>
+                <hr>
+            </div>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;" id="topSection">
+                <div class="modern-card" style="flex: 1; min-width: 400px;" id="formContainer">
                     <h3 style="margin-top:0; font-size: 15px;">Form Data Entry</h3>
                     <input type="hidden" id="editId">
                     <div class="input-grid">
@@ -140,25 +174,28 @@
                     <button onclick="simpanData()" id="btnAction" class="btn btn-save">SIMPAN DATA</button>
                     <button id="btnCancel" class="btn" style="display:none; width:100%; margin-top:5px; background:#e2e8f0;" onclick="resetForm()">Batal Edit</button>
                 </div>
-                <div class="modern-card" style="flex: 1; min-width: 320px;">
+                <div class="modern-card" style="flex: 1; min-width: 320px;" id="chartContainer">
                     <h3 style="margin-top:0; font-size: 14px; text-align: center;">Statistik Vendor</h3>
                     <canvas id="vendorChart" style="max-height: 220px;"></canvas>
                 </div>
             </div>
 
             <div class="modern-card">
-                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data vendor/model..." onkeyup="cariData()">
-                <table style="width:100%; border-collapse: collapse;">
+                <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+                    <input type="text" id="searchInput" class="search-box" placeholder="?? Cari data vendor/model..." onkeyup="cariData()">
+                    <button onclick="window.print()" class="btn btn-pdf">?? CETAK PDF</button>
+                </div>
+                <table class="bordered-table">
                     <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">NO</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">MODEL</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">DESAINER</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">SEASON</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">VENDOR</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">TGL KIRIM</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">KETERANGAN</th>
-                            <th style="padding:12px; text-align:left; font-size:11px; color:#64748b;">AKSI</th>
+                        <tr>
+                            <th>NO</th>
+                            <th>MODEL</th>
+                            <th>DESAINER</th>
+                            <th>SEASON</th>
+                            <th>VENDOR</th>
+                            <th>TGL KIRIM</th>
+                            <th>KETERANGAN</th>
+                            <th class="no-print-col">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -189,6 +226,7 @@
 </div>
 
 <script>
+    // Konfigurasi Firebase Anda tetap sama
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
@@ -219,7 +257,7 @@
     }
 
     function kembaliKeMenu() { document.getElementById("mainContent").style.display = "none"; document.getElementById("menuSelection").style.display = "flex"; }
-    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal")); }
+    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal Login")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
     
     auth.onAuthStateChanged(user => {
@@ -268,8 +306,8 @@
                 let isDrop = d.keterangan?.toUpperCase().includes("DROP");
                 html += `<tr class="${isDrop ? 'row-text-red' : ''}">
                     <td>${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td>
-                    <td><div class="static-cell">${d.keterangan || ''}</div></td>
-                    <td>
+                    <td>${d.keterangan || ''}</td>
+                    <td class="no-print-col">
                         <button class="btn" style="background:#dcfce7; color:#166534; padding:4px 8px;" onclick="editData('${doc.id}','${d.model}','${d.desainer}','${d.season}','${d.vendor}','${d.tglKirim}','${d.keterangan}')">Edit</button>
                         <button class="btn" style="background:#fee2e2; color:#991b1b; padding:4px 8px;" onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button>
                     </td></tr>`;
@@ -288,45 +326,22 @@
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
-        
         const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#0891b2', '#db2777'];
         Chart.register(ChartDataLabels);
-
         chartInstance = new Chart(ctx, { 
             type:'bar', 
-            data: { 
-                labels: Object.keys(data), 
-                datasets: [{ 
-                    data: Object.values(data), 
-                    backgroundColor: colors,
-                    borderRadius: 5
-                }] 
-            },
+            data: { labels: Object.keys(data), datasets: [{ data: Object.values(data), backgroundColor: colors, borderRadius: 5 }] },
             options: { 
                 plugins: { 
                     legend: { display: false },
                     datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        // MENAMPILKAN JUMLAH MODEL DAN PERSENTASE SEKALIGUS
-                        formatter: (value) => {
-                            let percentage = ((value / total) * 100).toFixed(1) + "%";
-                            return value + ' Model\n(' + percentage + ')';
-                        },
-                        font: { weight: 'bold', size: 10 },
-                        color: '#1e293b',
-                        textAlign: 'center'
+                        anchor: 'end', align: 'top',
+                        formatter: (value) => value + ' Model\n(' + ((value / total) * 100).toFixed(1) + "%)",
+                        font: { weight: 'bold', size: 10 }, color: '#1e293b', textAlign: 'center'
                     }
                 },
-                scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { stepSize: 1 },
-                        grid: { color: '#f1f5f9' }
-                    },
-                    x: { grid: { display: false } }
-                },
-                layout: { padding: { top: 35 } } // Memberi ruang lebih untuk label dua baris
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } },
+                layout: { padding: { top: 35 } }
             }
         });
     }
