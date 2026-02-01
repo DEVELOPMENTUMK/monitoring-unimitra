@@ -9,70 +9,102 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; margin: 0; color: #1e293b; }
+        :root { 
+            --primary: #2563eb; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --warning: #f59e0b; 
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+        }
+
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; }
         
         /* LOGIN OVERLAY */
         #loginOverlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
+            background: radial-gradient(circle at top right, #1e293b, #2563eb);
             display:flex; justify-content:center; align-items:center; z-index:2000; 
         }
-        .login-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; text-align: center; }
-        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
-        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        .login-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline:none; transition: 0.3s; }
+        .login-card input:focus { border-color: var(--primary); ring: 2px var(--primary); }
+        .btn-login { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-login:hover { background: #1d4ed8; transform: translateY(-2px); }
 
         /* MENU SELECTION */
-        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
-        .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .menu-container { display: flex; gap: 25px; flex-wrap: wrap; justify-content: center; }
         .menu-card {
-            background: white; width: 220px; padding: 30px; border-radius: 15px; text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s;
+            background: var(--card-bg); width: 240px; padding: 40px 20px; border-radius: 24px; text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.8);
         }
-        .menu-card:hover { transform: translateY(-5px); }
-        .menu-icon { font-size: 50px; margin-bottom: 15px; }
+        .menu-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); background: var(--primary); color: white; }
+        .menu-card:hover h3, .menu-card:hover p { color: white; }
+        .menu-icon { font-size: 60px; margin-bottom: 20px; }
 
         /* DASHBOARD STYLE */
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .main-container { padding: 20px; max-width: 1250px; margin: auto; }
-        .flex-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-start; }
-        .card { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 15px 30px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .main-container { padding: 30px; max-width: 1400px; margin: auto; }
         
-        .form-side { width: 400px; }
-        .chart-side { flex: 1; min-width: 320px; }
-        
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        input, textarea { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; }
-        textarea { height: 50px; resize: none; margin-top: 8px; }
-        label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; }
+        /* MODERN CARD UI */
+        .card { 
+            background: var(--card-bg); padding: 25px; border-radius: 20px; 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
 
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; margin-left: 8px; }
+        .flex-row { display: flex; gap: 25px; flex-wrap: wrap; align-items: stretch; }
+        .form-side { flex: 1; min-width: 400px; }
+        .chart-side { flex: 1.2; min-width: 400px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
+        /* MODERN INPUTS */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, textarea, .search-box { 
+            padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; 
+            width: 100%; box-sizing: border-box; font-size: 14px; transition: 0.3s;
+            background: #f8fafc;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        textarea { height: 80px; resize: none; }
 
-        .editable-cell { background: #fffef0; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 5px; cursor: text; min-height: 20px; color: initial; }
-        
-        /* CLASS UNTUK BARIS DROP (HANYA TEKS MERAH) */
-        .row-text-red { color: #dc2626 !important; font-weight: 600; }
-        .row-text-red .editable-cell { color: #dc2626 !important; border-color: #fecaca; }
+        /* BUTTONS */
+        .btn { padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-save { background: var(--primary); color: white; width: 100%; justify-content: center; margin-top: 10px; }
+        .btn-save:hover { opacity: 0.9; transform: scale(0.98); }
+        .btn-edit { background: #dcfce7; color: #166534; padding: 6px 12px; font-size: 12px; }
+        .btn-delete { background: #fee2e2; color: #991b1b; padding: 6px 12px; font-size: 12px; }
+        .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
 
-        /* JURNAL STYLE */
-        .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
-        .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; }
-        .jurnal-table td { border: 1px solid #cbd5e1; }
+        /* SEARCH BAR */
+        .search-container { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .search-box { width: 350px; background: white url('https://cdn-icons-png.flaticon.com/512/149/149852.png') no-repeat 15px center; background-size: 15px; padding-left: 45px; }
+
+        /* TABLE */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        tr:hover td { background-color: #fbfcfe; }
+
+        .editable-cell { padding: 8px; border-radius: 8px; transition: 0.3s; cursor: text; border: 1px solid transparent; }
+        .editable-cell:hover { background: #fffef0; border-color: #fde68a; }
+
+        /* STATUS DROP */
+        .row-text-red td { color: var(--danger) !important; font-weight: 600; }
+
+        /* CHART UI */
+        #vendorChart { filter: drop-shadow(0 10px 8px rgba(0,0,0,0.04)); }
 
         @media print {
-            .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .no-print { display: none !important; }
+            .header, .form-side, .btn-tool, .no-print, .search-container, #menuSelection, #loginOverlay { display: none !important; }
             .card { border: none; box-shadow: none; width: 100%; }
-            .jurnal-table th { background: #eee !important; color: #000 !important; border: 1px solid #000; }
-            .jurnal-table td { border: 1px solid #000; }
         }
     </style>
 </head>
@@ -80,82 +112,113 @@
 
 <div id="loginOverlay">
     <div class="login-card">
-        <h2 style="margin:0;">PT.UNIMITRA KHARISMA</h2>
+        <h1 style="margin:0; font-size: 24px; color: var(--primary);">UNIMITRA</h1>
+        <p style="color: #64748b; margin-bottom: 20px;">Silakan masuk ke akun Anda</p>
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
-        <button onclick="login()" class="btn-login">SIGN IN</button>
+        <button onclick="login()" class="btn-login">Masuk ke Dashboard</button>
     </div>
 </div>
 
 <div id="menuSelection">
-    <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
+    <h2 style="margin-bottom: 40px; font-size: 28px; font-weight: 800; color: #1e293b;">PT. UNIMITRA KHARISMA</h2>
     <div class="menu-container">
         <div class="menu-card" onclick="bukaHalamanInput()">
-            <div class="menu-icon">📝</div>
-            <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
+            <div class="menu-icon">📦</div>
+            <h3 style="margin:0; font-size: 18px;">Input Data Vendor</h3>
+            <p style="font-size: 13px; color: #64748b; margin-top: 8px;">Kelola pengiriman & development</p>
         </div>
         <div class="menu-card" onclick="bukaHalamanCommers()">
             <div class="menu-icon">📊</div>
-            <h3 style="margin:0; color: var(--primary);">Commers</h3>
+            <h3 style="margin:0; font-size: 18px;">Commers</h3>
+            <p style="font-size: 13px; color: #64748b; margin-top: 8px;">Laporan harian & jurnal kerja</p>
         </div>
     </div>
-    <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b;">Logout</button>
 </div>
 
 <div id="mainContent" style="display:none;">
     <div class="header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliKeMenu()" class="btn-tool">🏠 Menu</button>
-            <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA KHARISMA</h2>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button onclick="kembaliKeMenu()" class="btn btn-tool">🏠 Kembali</button>
+            <h2 id="pageTitle" style="margin:0; font-size: 20px; font-weight: 700;">Dashboard</h2>
         </div>
-        <div id="userTag" style="font-size:12px; font-weight:bold;"></div>
+        <div id="userTag" style="font-size:14px; color:#64748b; background: #f1f5f9; padding: 8px 15px; border-radius: 20px; font-weight: 600;"></div>
     </div>
 
     <div class="main-container">
         <div id="uiMonitoring">
             <div class="flex-row">
                 <div class="card form-side">
-                    <h3 style="margin:0 0 10px 0; font-size: 15px;">Form Entry</h3>
+                    <h3 style="margin:0 0 20px 0; font-size: 18px;">Entry Data Baru</h3>
                     <input type="hidden" id="editId">
                     <div class="input-grid">
-                        <div><label>Model</label><input type="text" id="model"></div>
-                        <div><label>Desainer</label><input type="text" id="desainer"></div>
+                        <div class="form-group"><label>Model Name</label><input type="text" id="model" placeholder="Contoh: Jacket A1"></div>
+                        <div class="form-group"><label>Desainer</label><input type="text" id="desainer" placeholder="Nama desainer"></div>
                     </div>
                     <div class="input-grid">
-                        <div><label>Season</label><input type="text" id="season"></div>
-                        <div><label>Vendor</label><input type="text" id="vendor"></div>
+                        <div class="form-group"><label>Season</label><input type="text" id="season" placeholder="SS24 / FW24"></div>
+                        <div class="form-group"><label>Vendor</label><input type="text" id="vendor" placeholder="Nama pabrik/vendor"></div>
                     </div>
-                    <div><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
-                    <textarea id="keterangan" placeholder="Keterangan..."></textarea>
-                    <button onclick="simpanData()" class="btn btn-save">SIMPAN DATA</button>
+                    <div class="form-group"><label>Tanggal Kirim</label><input type="date" id="tglKirim"></div>
+                    <div class="form-group"><label>Keterangan Tambahan</label><textarea id="keterangan" placeholder="Tulis catatan di sini..."></textarea></div>
+                    <button onclick="simpanData()" id="btnSave" class="btn btn-save">🚀 Simpan Perubahan</button>
+                    <button id="btnCancelEdit" class="btn" style="display:none; width:100%; margin-top:10px; background:#f1f5f9; color:#475569; justify-content:center;" onclick="resetForm()">Batal Edit</button>
                 </div>
-                <div class="card chart-side"><canvas id="vendorChart" style="max-height: 180px;"></canvas></div>
+                <div class="card chart-side">
+                    <h3 style="margin:0 0 10px 0; font-size: 18px;">Statistik Vendor</h3>
+                    <canvas id="vendorChart"></canvas>
+                </div>
             </div>
+
             <div class="card">
-                <table id="dataTable">
-                    <thead>
-                        <tr><th>No</th><th>Model</th><th>Desainer</th><th>Season</th><th>Vendor</th><th>Tgl Kirim</th><th>Keterangan</th><th>Aksi</th></tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+                <div class="search-container">
+                    <h3 style="margin:0; font-size: 18px;">Data Monitoring</h3>
+                    <input type="text" id="searchInput" class="search-box" placeholder="Cari Model, Vendor, atau Desainer..." onkeyup="cariData()">
+                </div>
+                <div class="table-wrapper">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Model</th>
+                                <th>Desainer</th>
+                                <th>Season</th>
+                                <th>Vendor</th>
+                                <th>Tgl Kirim</th>
+                                <th>Keterangan</th>
+                                <th class="no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div id="uiCommers" style="display:none;">
             <div class="card">
-                <h2 style="text-align:center; border-bottom: 2px solid #333; padding-bottom:10px;">Laporan Jurnal Harian Kerja</h2>
-                <div class="profile-box">
-                    <pre>NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : DRAFTER & GRAPHIC FILM</pre>
+                <h2 style="text-align:center; border-bottom: 2px solid #333; padding-bottom:15px; margin-bottom:20px;">LAPORAN JURNAL HARIAN KERJA</h2>
+                <div style="font-family: 'Courier New', monospace; font-weight: bold; margin-bottom: 25px; line-height: 1.6;">
+                    NAMA          : Arif Setiawan<br>
+                    NIK           : 2040412<br>
+                    DEPARTEMEN    : Development<br>
+                    JOBDESK       : DRAFTER & GRAPHIC FILM
                 </div>
-                <table class="jurnal-table" id="jurnalTable">
+                <table style="width:100%; border: 1px solid #cbd5e1; border-collapse: collapse;">
                     <thead>
-                        <tr><th width="5%">NO</th><th width="15%">HARI</th><th width="20%">TGL/BLN/THN</th><th width="55%">URAIAN KEGIATAN</th><th class="no-print">X</th></tr>
+                        <tr style="background:#334155; color:white;">
+                            <th style="color:white; border: 1px solid #475569; text-align:center;">NO</th>
+                            <th style="color:white; border: 1px solid #475569;">HARI</th>
+                            <th style="color:white; border: 1px solid #475569;">TGL/BLN/THN</th>
+                            <th style="color:white; border: 1px solid #475569;">URAIAN KEGIATAN</th>
+                            <th style="color:white; border: 1px solid #475569;" class="no-print">X</th>
+                        </tr>
                     </thead>
                     <tbody id="jurnalTableBody"></tbody>
                 </table>
-                <div class="no-print" style="margin-top:20px;">
-                    <button class="btn" style="background:var(--primary); color:white;" onclick="addRowJurnal()">+ Baris</button>
-                    <button class="btn" style="background:#64748b; color:white;" onclick="window.print()">Cetak</button>
+                <div class="no-print" style="margin-top:25px; display:flex; gap:10px;">
+                    <button class="btn btn-save" style="width:auto;" onclick="addRowJurnal()">+ Tambah Baris</button>
+                    <button class="btn btn-tool" onclick="window.print()">🖨️ Cetak Jurnal</button>
                 </div>
             </div>
         </div>
@@ -163,7 +226,7 @@
 </div>
 
 <script>
-    // Konfigurasi Firebase Anda
+    // Konfigurasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyC-ZkAIyIRqmXf65Bh_PgjDfAVcx_l_3bo",
         authDomain: "umk-monitoring.firebaseapp.com",
@@ -178,32 +241,72 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    // --- NAV ---
+    // --- NAVIGATION ---
     function bukaHalamanInput() { 
         document.getElementById("menuSelection").style.display="none"; 
         document.getElementById("mainContent").style.display="block";
         document.getElementById("uiMonitoring").style.display="block";
         document.getElementById("uiCommers").style.display="none";
+        document.getElementById("pageTitle").innerText = "Input Data Vendor";
     }
     function bukaHalamanCommers() { 
         document.getElementById("menuSelection").style.display="none"; 
         document.getElementById("mainContent").style.display="block";
         document.getElementById("uiMonitoring").style.display="none";
         document.getElementById("uiCommers").style.display="block";
+        document.getElementById("pageTitle").innerText = "Commers - Jurnal Kerja";
         renderJurnal();
     }
     function kembaliKeMenu() { document.getElementById("mainContent").style.display="none"; document.getElementById("menuSelection").style.display="flex"; }
 
     // --- AUTH ---
-    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal")); }
+    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Login Gagal!")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
-    auth.onAuthStateChanged(user => { if(user){ document.getElementById("loginOverlay").style.display="none"; document.getElementById("menuSelection").style.display="flex"; muatData(); } });
+    auth.onAuthStateChanged(user => { 
+        if(user){ 
+            document.getElementById("loginOverlay").style.display="none"; 
+            document.getElementById("menuSelection").style.display="flex"; 
+            document.getElementById("userTag").innerText = "👤 " + user.email.split('@')[0].toUpperCase();
+            muatData(); 
+        } 
+    });
 
-    // --- DATA ---
+    // --- CRUD MONITORING ---
     async function simpanData() {
-        const data = { model:model.value, desainer:desainer.value, vendor:vendor.value, season:season.value, tglKirim:tglKirim.value, keterangan:keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
-        await db.collection("data_unimitra").add(data);
-        model.value=""; desainer.value=""; vendor.value=""; season.value=""; keterangan.value="";
+        const id = document.getElementById("editId").value;
+        const data = { 
+            model: model.value, desainer: desainer.value, vendor: vendor.value, 
+            season: season.value, tglKirim: tglKirim.value, keterangan: keterangan.value, 
+            waktu: firebase.firestore.FieldValue.serverTimestamp() 
+        };
+
+        if(id) {
+            await db.collection("data_unimitra").doc(id).update(data);
+        } else {
+            await db.collection("data_unimitra").add(data);
+        }
+        resetForm();
+    }
+
+    function editData(id, m, d, s, v, t, k) {
+        document.getElementById("editId").value = id;
+        document.getElementById("model").value = m;
+        document.getElementById("desainer").value = d;
+        document.getElementById("season").value = s;
+        document.getElementById("vendor").value = v;
+        document.getElementById("tglKirim").value = t;
+        document.getElementById("keterangan").value = k;
+        
+        document.getElementById("btnSave").innerText = "💾 Perbarui Data";
+        document.getElementById("btnCancelEdit").style.display = "block";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function resetForm() {
+        document.getElementById("editId").value = "";
+        model.value = ""; desainer.value = ""; vendor.value = ""; season.value = ""; keterangan.value = ""; tglKirim.value = "";
+        document.getElementById("btnSave").innerText = "🚀 Simpan Perubahan";
+        document.getElementById("btnCancelEdit").style.display = "none";
     }
 
     function muatData() {
@@ -214,35 +317,55 @@
                 counts[d.vendor] = (counts[d.vendor] || 0) + 1; total++;
                 let isDrop = d.keterangan?.toUpperCase().includes("DROP");
                 
-                // BARIS AKAN BERWARNA MERAH JIKA ADA KATA 'DROP'
                 html += `<tr class="${isDrop ? 'row-text-red' : ''}">
-                    <td>${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td>
-                    <td><div class="editable-cell" contenteditable="true" onblur="db.collection('data_unimitra').doc('${doc.id}').update({keterangan:this.innerText})">${d.keterangan || ''}</div></td>
-                    <td><button onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button></td></tr>`;
+                    <td>${i++}</td>
+                    <td><b>${d.model}</b></td>
+                    <td>${d.desainer}</td>
+                    <td>${d.season}</td>
+                    <td>${d.vendor}</td>
+                    <td>${d.tglKirim}</td>
+                    <td><div class="editable-cell" onblur="db.collection('data_unimitra').doc('${doc.id}').update({keterangan:this.innerText})">${d.keterangan || ''}</div></td>
+                    <td class="no-print">
+                        <button class="btn btn-edit" onclick="editData('${doc.id}','${d.model}','${d.desainer}','${d.season}','${d.vendor}','${d.tglKirim}','${d.keterangan}')">Edit</button>
+                        <button class="btn btn-delete" onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button>
+                    </td>
+                </tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
             renderChart(counts, total);
         });
     }
 
+    // --- SEARCH FEATURE ---
+    function cariData() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.getElementById("tableBody").getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            let text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = text.includes(input) ? "" : "none";
+        }
+    }
+
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
-        
-        // WARNA GRAFIK DIBEDAKAN TIAP BAR (COLORFUL)
-        const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#7c3aed', '#db2777', '#0891b2'];
-        
+        const colors = ['#3b82f6', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4'];
         chartInstance = new Chart(ctx, { 
             type:'bar', 
             data: { 
                 labels: Object.keys(data), 
                 datasets: [{ 
-                    label:'%', 
+                    label:'Kontribusi Vendor (%)', 
                     data: Object.values(data).map(v=>((v/total)*100).toFixed(1)), 
-                    backgroundColor: colors 
+                    backgroundColor: colors,
+                    borderRadius: 8
                 }] 
             },
-            options: { plugins: { legend: { display: false } } }
+            options: { 
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+            }
         });
     }
 
@@ -251,11 +374,14 @@
     function renderJurnal() {
         const body = document.getElementById('jurnalTableBody'); body.innerHTML = '';
         journals.forEach((item, index) => {
-            body.innerHTML += `<tr><td align="center">${index+1}</td>
-                <td contenteditable="true" onblur="updJurnal(${index},'hari',this.innerText)">${item.hari}</td>
-                <td contenteditable="true" onblur="updJurnal(${index},'tgl',this.innerText)">${item.tgl}</td>
-                <td contenteditable="true" onblur="updJurnal(${index},'uraian',this.innerText)">${item.uraian}</td>
-                <td class="no-print" align="center"><button onclick="delJurnal(${index})" style="color:red; border:none; background:none; cursor:pointer;">X</button></td></tr>`;
+            body.innerHTML += `<tr style="border-bottom: 1px solid #cbd5e1;">
+                <td align="center" style="border: 1px solid #cbd5e1; padding: 10px;">${index+1}</td>
+                <td contenteditable="true" style="border: 1px solid #cbd5e1; padding: 10px;" onblur="updJurnal(${index},'hari',this.innerText)">${item.hari}</td>
+                <td contenteditable="true" style="border: 1px solid #cbd5e1; padding: 10px;" onblur="updJurnal(${index},'tgl',this.innerText)">${item.tgl}</td>
+                <td contenteditable="true" style="border: 1px solid #cbd5e1; padding: 10px;" onblur="updJurnal(${index},'uraian',this.innerText)">${item.uraian}</td>
+                <td class="no-print" align="center" style="border: 1px solid #cbd5e1; padding: 10px;">
+                    <button onclick="delJurnal(${index})" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold;">X</button>
+                </td></tr>`;
         });
     }
     function addRowJurnal() { journals.push({hari:'', tgl:'', uraian:''}); saveJurnal(); }
