@@ -25,8 +25,6 @@
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .btn-register { background: none; border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 15px; }
-        .forgot-link { display: block; margin-top: 15px; font-size: 12px; color: #64748b; text-decoration: none; cursor: pointer; }
-        .forgot-link:hover { color: var(--primary); text-decoration: underline; }
 
         /* MENU SELECTION */
         #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; }
@@ -64,7 +62,9 @@
 
         .editable-cell { background: #fffef0; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 5px; cursor: text; min-height: 20px; }
         .editable-cell:focus { background: #fff; border: 1px solid var(--primary); outline: none; }
-        .row-drop { background-color: #fee2e2 !important; }
+        
+        /* CSS KHUSUS UNTUK TEKS MERAH JIKA DROP */
+        .text-drop { color: #dc2626 !important; font-weight: bold; }
 
         /* JURNAL SPECIFIC (FOR COMMERS) */
         .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
@@ -89,7 +89,6 @@
         <input type="text" id="userInput" placeholder="Username">
         <input type="password" id="passInput" placeholder="Password">
         <button onclick="login()" class="btn-login">SIGN IN</button>
-        <button onclick="daftar()" class="btn-register">BUAT USER BARU</button>
     </div>
 </div>
 
@@ -189,7 +188,6 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    // --- NAVIGATION ---
     function bukaHalamanInput() {
         document.getElementById("menuSelection").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
@@ -212,7 +210,6 @@
         document.getElementById("menuSelection").style.display = "flex";
     }
 
-    // --- AUTH ---
     function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Login Gagal")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
     auth.onAuthStateChanged(user => {
@@ -224,7 +221,6 @@
         }
     });
 
-    // --- MONITORING LOGIC ---
     async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = { model:model.value, desainer:desainer.value, vendor:vendor.value, season:season.value, tglKirim:tglKirim.value, keterangan:keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
@@ -232,28 +228,38 @@
         resetForm();
     }
     function resetForm() { document.getElementById("editId").value=""; model.value=""; desainer.value=""; vendor.value=""; season.value=""; keterangan.value=""; tglKirim.value=""; }
+    
     function muatData() {
         db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snap => {
             let html = ""; let i = 1; let counts = {}; let total = 0;
             snap.forEach(doc => {
                 let d = doc.data(); counts[d.vendor] = (counts[d.vendor] || 0) + 1; total++;
+                
+                // CEK KATA DROP UNTUK WARNA TEKS
                 let isDrop = d.keterangan?.toUpperCase().includes("DROP");
-                html += `<tr class="${isDrop ? 'row-drop' : ''}">
+                
+                html += `<tr>
                     <td>${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td>
-                    <td><div class="editable-cell" contenteditable="true" onblur="db.collection('data_unimitra').doc('${doc.id}').update({keterangan:this.innerText})">${d.keterangan || ''}</div></td>
+                    <td>
+                        <div class="editable-cell ${isDrop ? 'text-drop' : ''}" 
+                             contenteditable="true" 
+                             onblur="db.collection('data_unimitra').doc('${doc.id}').update({keterangan:this.innerText})">
+                             ${d.keterangan || ''}
+                        </div>
+                    </td>
                     <td><button onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button></td></tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
             renderChart(counts, total);
         });
     }
+
     function renderChart(data, total) {
         const ctx = document.getElementById('vendorChart').getContext('2d');
         if(chartInstance) chartInstance.destroy();
         chartInstance = new Chart(ctx, { type:'bar', data: { labels: Object.keys(data), datasets: [{ label:'%', data: Object.values(data).map(v=>((v/total)*100).toFixed(1)), backgroundColor:'#2563eb'}] } });
     }
 
-    // --- JURNAL LOGIC (LOCALSTORAGE) ---
     let journals = JSON.parse(localStorage.getItem('umk_jurnal')) || [{hari:'', tgl:'', uraian:''}];
     function renderJurnal() {
         const body = document.getElementById('jurnalTableBody'); body.innerHTML = '';
