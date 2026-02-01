@@ -62,8 +62,24 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; }
 
-        .row-drop { color: var(--danger) !important; font-weight: bold; }
-        .row-drop td { color: var(--danger) !important; }
+        /* LIVE UPDATE STYLE */
+        .editable-cell { 
+            background: #fffef0; 
+            border: 1px dashed #cbd5e1; 
+            border-radius: 4px; 
+            padding: 5px; 
+            cursor: text;
+            min-height: 20px;
+        }
+        .editable-cell:focus {
+            background: #fff;
+            border: 1px solid var(--primary);
+            outline: none;
+            box-shadow: 0 0 5px rgba(37,99,235,0.2);
+        }
+
+        .row-drop { background-color: #fee2e2 !important; }
+        .row-drop td { color: var(--danger) !important; font-weight: bold; }
 
         @media print {
             .header, .form-side, .btn-tool, #loginOverlay, #menuSelection, .search-container, td:last-child, th:last-child { display: none !important; }
@@ -157,7 +173,7 @@
                         <th>Season</th>
                         <th>Vendor</th>
                         <th>Tgl Kirim</th>
-                        <th>Keterangan</th>
+                        <th style="width: 250px;">Keterangan (Live Edit)</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -184,7 +200,6 @@
 
     const formatEmail = (user) => user.toLowerCase().trim().replace(/\s/g, '') + "@unimitra.com";
 
-    // Fungsi Navigasi
     function bukaHalamanInput() {
         document.getElementById("menuSelection").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
@@ -202,7 +217,6 @@
         document.getElementById("menuSelection").style.display = "flex";
     }
 
-    // Auth Functions
     function login() { 
         auth.signInWithEmailAndPassword(formatEmail(userInput.value), passInput.value).catch(() => alert("Gagal Login!")); 
     }
@@ -232,7 +246,7 @@
         }
     });
 
-    // Data Firestore Functions
+    // SIMPAN DATA UTAMA
     async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = { 
@@ -247,6 +261,18 @@
         if(!model.value || !vendor.value || !tglKirim.value) return alert("Mohon lengkapi data!");
         id ? await db.collection("data_unimitra").doc(id).update(data) : await db.collection("data_unimitra").add(data);
         resetForm();
+    }
+
+    // FUNGSI LIVE UPDATE KETERANGAN
+    async function updateKeteranganLangsung(id, teksBaru) {
+        try {
+            await db.collection("data_unimitra").doc(id).update({
+                keterangan: teksBaru
+            });
+            console.log("Keterangan diupdate otomatis.");
+        } catch (e) {
+            console.error("Gagal update live:", e);
+        }
     }
 
     function resetForm() {
@@ -274,7 +300,11 @@
                     <td>${d.season}</td>
                     <td>${d.vendor}</td>
                     <td>${displayDate}</td>
-                    <td>${d.keterangan || '-'}</td>
+                    <td>
+                        <div class="editable-cell" contenteditable="true" onblur="updateKeteranganLangsung('${doc.id}', this.innerText)">
+                            ${d.keterangan || ''}
+                        </div>
+                    </td>
                     <td>
                         <span onclick="persiapkanEdit('${doc.id}','${d.model}','${d.desainer || ''}','${d.vendor}','${d.season}','${d.keterangan}','${d.tglKirim}')" style="color:var(--warning); cursor:pointer; font-weight:bold;">Edit</span>
                         <span onclick="hapus('${doc.id}')" style="color:var(--danger); cursor:pointer; font-weight:bold; margin-left:10px;">Hapus</span>
@@ -321,7 +351,7 @@
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function hapus(id) { if(confirm("Hapus?")) db.collection("data_unimitra").doc(id).delete(); }
+    function hapus(id) { if(confirm("Hapus data ini?")) db.collection("data_unimitra").doc(id).delete(); }
 
     function cariData() {
         let val = searchInput.value.toLowerCase();
