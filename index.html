@@ -69,13 +69,13 @@
         /* SEARCH BOX */
         .search-box { width: 300px; padding: 10px 15px; border-radius: 20px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
 
-        /* TABLE STYLE */
+        /* TABLE STYLE - DIUBAH MENJADI CENTER */
         .bordered-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
         .bordered-table th { 
             background: #f8fafc; 
             border: 1px solid var(--border-color); 
             padding: 12px; 
-            text-align: left; 
+            text-align: center; /* Rata Tengah */
             font-size: 11px; 
             color: #64748b; 
             text-transform: uppercase;
@@ -84,7 +84,12 @@
             border: 1px solid var(--border-color); 
             padding: 10px 12px; 
             font-size: 13px; 
+            text-align: center; /* Rata Tengah */
+            vertical-align: middle;
         }
+
+        /* Menjaga tombol aksi tetap rapi di tengah */
+        .no-print-col { text-align: center !important; }
 
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
 
@@ -107,7 +112,6 @@
             .bordered-table { width: 100%; margin-top: 20px; }
             .bordered-table th, .bordered-table td { border: 1px solid #000 !important; color: black !important; }
             
-            /* Tampilkan Judul Laporan Saat Print Monitoring */
             #printTitle { display: block !important; text-align: center; margin-bottom: 20px; }
         }
         
@@ -129,11 +133,11 @@
     <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
     <div class="menu-container">
         <div class="menu-card" onclick="bukaHalamanInput()">
-            <div class="menu-icon">📝</div>
+            <div class="menu-icon">??</div>
             <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
         </div>
         <div class="menu-card" onclick="bukaHalamanCommers()">
-            <div class="menu-icon">📊</div>
+            <div class="menu-icon">??</div>
             <h3 style="margin:0; color: var(--primary);">Commers</h3>
         </div>
     </div>
@@ -143,7 +147,7 @@
 <div id="mainContent" style="display:none;">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliKeMenu()" class="btn-tool">🏠 Menu</button>
+            <button onclick="kembaliKeMenu()" class="btn-tool">? Menu</button>
             <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA</h2>
         </div>
         <div id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></div>
@@ -182,8 +186,8 @@
 
             <div class="modern-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
-                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data vendor/model..." onkeyup="cariData()">
-                    <button onclick="window.print()" class="btn btn-pdf">📄 CETAK PDF</button>
+                    <input type="text" id="searchInput" class="search-box" placeholder="?? Cari data vendor/model..." onkeyup="cariData()">
+                    <button onclick="window.print()" class="btn btn-pdf">?? CETAK PDF</button>
                 </div>
                 <table class="bordered-table">
                     <thead>
@@ -208,7 +212,7 @@
                 <div class="jurnal-header">PT. UNIMITRA KHARISMA</div>
                 <h2 style="text-align:center; border-bottom: 2px solid #333; padding-bottom:10px; margin-bottom:20px;">Laporan Jurnal Harian Kerja</h2>
                 <div class="profile-box">
-                    <pre style="margin:0;">NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : GRAPHIC & FILM DRAFTER</pre>
+                    <pre style="margin:0;">NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : DRAFTER & GRAPHIC FILM</pre>
                 </div>
                 <table class="jurnal-table" id="jurnalTable">
                     <thead>
@@ -365,5 +369,3 @@
 
 </body>
 </html>
-
-
