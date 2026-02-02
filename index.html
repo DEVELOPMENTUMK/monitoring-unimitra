@@ -23,7 +23,6 @@
 
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; color: #1e293b; }
         
-        /* LOGIN OVERLAY */
         #loginOverlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
             background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);
@@ -33,7 +32,6 @@
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-        /* MENU SELECTION */
         #menuSelection { height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .menu-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         .menu-card {
@@ -43,11 +41,9 @@
         .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .menu-icon { font-size: 50px; margin-bottom: 15px; }
 
-        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .main-container { padding: 20px; max-width: 1300px; margin: auto; }
 
-        /* UI MODERN INPUT VENDOR */
         .modern-card { 
             background: white; padding: 25px; border-radius: 16px; 
             border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
@@ -66,37 +62,22 @@
         .btn-pdf { background: #64748b; color: white; margin-left: 10px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
         
-        /* SEARCH BOX */
         .search-box { width: 300px; padding: 10px 15px; border-radius: 20px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
 
-        /* TABLE STYLE */
         .bordered-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
         .bordered-table th { 
-            background: #f8fafc; 
-            border: 1px solid var(--border-color); 
-            padding: 12px; 
-            text-align: center;
-            font-size: 11px; 
-            color: #64748b; 
-            text-transform: uppercase;
+            background: #f8fafc; border: 1px solid var(--border-color); 
+            padding: 12px; text-align: center; font-size: 11px; color: #64748b; text-transform: uppercase;
         }
-        .bordered-table td { 
-            border: 1px solid var(--border-color); 
-            padding: 10px 12px; 
-            font-size: 13px; 
-            text-align: center;
-        }
-
+        .bordered-table td { border: 1px solid var(--border-color); padding: 10px 12px; font-size: 13px; text-align: center; }
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
 
-        /* COMMERS STYLE */
         .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
         .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
         .jurnal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
         .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; text-align: center; }
 
-        /* PRINT CONFIGURATION */
         @media print {
             body { background: white; }
             .header, #menuSelection, #loginOverlay, .no-print, .search-box, .btn-tool, 
@@ -107,7 +88,6 @@
             .bordered-table th, .bordered-table td { border: 1px solid #000 !important; color: black !important; }
             #printTitle { display: block !important; text-align: center; margin-bottom: 20px; }
         }
-        
         #printTitle { display: none; }
     </style>
 </head>
@@ -126,11 +106,11 @@
     <h2 style="margin-bottom: 30px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
     <div class="menu-container">
         <div class="menu-card" onclick="bukaHalamanInput()">
-            <div class="menu-icon">??</div>
+            <div class="menu-icon">📦</div>
             <h3 style="margin:0; color: var(--primary);">Input Data Vendor</h3>
         </div>
         <div class="menu-card" onclick="bukaHalamanCommers()">
-            <div class="menu-icon">??</div>
+            <div class="menu-icon">📑</div>
             <h3 style="margin:0; color: var(--primary);">Commers</h3>
         </div>
     </div>
@@ -140,7 +120,7 @@
 <div id="mainContent" style="display:none;">
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <button onclick="kembaliKeMenu()" class="btn-tool">?? Menu</button>
+            <button onclick="kembaliKeMenu()" class="btn-tool">🔙 Menu</button>
             <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA</h2>
         </div>
         <div id="userTag" style="font-size:12px; font-weight:bold; color:#64748b;"></div>
@@ -179,8 +159,8 @@
 
             <div class="modern-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
-                    <input type="text" id="searchInput" class="search-box" placeholder="?? Cari data vendor/model..." onkeyup="cariData()">
-                    <button onclick="window.print()" class="btn btn-pdf">?? CETAK PDF</button>
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Cari data vendor/model..." onkeyup="cariData()">
+                    <button onclick="window.print()" class="btn btn-pdf">📄 CETAK PDF</button>
                 </div>
                 <table class="bordered-table">
                     <thead>
@@ -313,7 +293,6 @@
         });
     }
 
-    // FUNGSI CARI DATA DENGAN NOMOR URUT OTOMATIS
     function cariData() {
         let val = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.getElementById("tableBody").getElementsByTagName("tr");
