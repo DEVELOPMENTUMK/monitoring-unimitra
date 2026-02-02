@@ -75,7 +75,7 @@
             background: #f8fafc; 
             border: 1px solid var(--border-color); 
             padding: 12px; 
-            text-align: center; /* DIUBAH KE TENGAH */
+            text-align: center;
             font-size: 11px; 
             color: #64748b; 
             text-transform: uppercase;
@@ -84,31 +84,20 @@
             border: 1px solid var(--border-color); 
             padding: 10px 12px; 
             font-size: 13px; 
-            text-align: center; /* DIUBAH KE TENGAH */
+            text-align: center;
         }
 
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
-
-        /* COMMERS STYLE */
-        .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
-        .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
-        .jurnal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
-        .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; text-align: center; } /* DIUBAH KE TENGAH */
 
         /* PRINT CONFIGURATION */
         @media print {
             body { background: white; }
             .header, #menuSelection, #loginOverlay, .no-print, .search-box, .btn-tool, 
             #formContainer, #chartContainer, .no-print-col { display: none !important; }
-            
             .main-container { padding: 0; }
             .modern-card { border: none; box-shadow: none; padding: 0; margin: 0; }
-            
             .bordered-table { width: 100%; margin-top: 20px; }
             .bordered-table th, .bordered-table td { border: 1px solid #000 !important; color: black !important; }
-            
-            /* Tampilkan Judul Laporan Saat Print Monitoring */
             #printTitle { display: block !important; text-align: center; margin-bottom: 20px; }
         }
         
@@ -209,7 +198,7 @@
                 <div class="jurnal-header">PT. UNIMITRA KHARISMA</div>
                 <h2 style="text-align:center; border-bottom: 2px solid #333; padding-bottom:10px; margin-bottom:20px;">Laporan Jurnal Harian Kerja</h2>
                 <div class="profile-box">
-                    <pre style="margin:0;">NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : GRAPHIC & FILM DRAFTER</pre>
+                    <pre style="margin:0;">NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : DRAFTER & GRAPHIC FILM</pre>
                 </div>
                 <table class="jurnal-table" id="jurnalTable">
                     <thead>
@@ -306,7 +295,7 @@
                 total++;
                 let isDrop = d.keterangan?.toUpperCase().includes("DROP");
                 html += `<tr class="${isDrop ? 'row-text-red' : ''}">
-                    <td>${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td>
+                    <td class="row-number">${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td>
                     <td>${d.keterangan || ''}</td>
                     <td class="no-print-col">
                         <button class="btn" style="background:#dcfce7; color:#166534; padding:4px 8px;" onclick="editData('${doc.id}','${d.model}','${d.desainer}','${d.season}','${d.vendor}','${d.tglKirim}','${d.keterangan}')">Edit</button>
@@ -318,10 +307,23 @@
         });
     }
 
+    // FUNGSI CARI DATA YANG SUDAH DIPERBAIKI NOMOR URUTNYA
     function cariData() {
         let val = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.getElementById("tableBody").getElementsByTagName("tr");
-        for (let row of rows) { row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none"; }
+        let currentNumber = 1;
+
+        for (let row of rows) {
+            // Periksa apakah baris mengandung teks pencarian
+            if (row.innerText.toLowerCase().includes(val)) {
+                row.style.display = ""; // Tampilkan baris
+                // Update kolom pertama (nomor) agar tetap berurutan
+                row.querySelector(".row-number").innerText = currentNumber;
+                currentNumber++;
+            } else {
+                row.style.display = "none"; // Sembunyikan baris
+            }
+        }
     }
 
     function renderChart(data, total) {
@@ -347,6 +349,7 @@
         });
     }
 
+    // Jurnal functions...
     let journals = JSON.parse(localStorage.getItem('umk_jurnal')) || [{hari:'', tgl:'', uraian:''}];
     function renderJurnal() {
         const body = document.getElementById('jurnalTableBody'); body.innerHTML = '';
@@ -366,4 +369,3 @@
 
 </body>
 </html>
-
