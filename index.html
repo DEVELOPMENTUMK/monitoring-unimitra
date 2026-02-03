@@ -72,18 +72,55 @@
         .bordered-table td { border: 1px solid var(--border-color); padding: 10px 12px; font-size: 13px; text-align: center; }
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
 
+        /* STYLE JURNAL HARIAN */
         .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
         .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
         .jurnal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
         .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; text-align: center; }
 
+        /* --- STYLE KHUSUS FORM DINAS LUAR (A4 PRECISION) --- */
+        .page-a4 {
+            width: 210mm; height: 297mm; background: white;
+            display: flex; flex-direction: column; position: relative;
+            margin: 30px auto; box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+        .form-section-dinas {
+            height: 148.5mm; width: 100%; padding: 12mm 20mm;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .divider-dots {
+            position: absolute; top: 148.5mm; left: 0; width: 100%;
+            border-top: 1px dashed #bbb; z-index: 10;
+        }
+        .dinas-company { font-size: 11pt; font-weight: bold; margin-bottom: 5px; text-align: left; }
+        .form-section-dinas h2 { text-align: center; text-decoration: underline; text-transform: uppercase; font-size: 16pt; margin: 5px 0 25px 0; }
+        .dinas-table { width: 100%; border-collapse: collapse; }
+        .dinas-table td { padding: 7px 0; font-size: 11pt; vertical-align: bottom; color: black; }
+        .dots { border-bottom: 1px dotted #000; }
+        .location-area { margin-top: 20px; font-size: 11pt; margin-bottom: 5px; }
+        .signature-row {
+            margin-top: auto;
+            margin-bottom: 2mm;
+            display: flex;
+            justify-content: space-between;
+        }
+        .sig-box { text-align: center; width: 32%; font-size: 10pt; }
+        .sig-space { height: 65px; }
+
         @media print {
+            @page { size: A4 portrait; margin: 0; }
             body { background: white; }
             .header, #menuSelection, #loginOverlay, .no-print, .search-box, .btn-tool, 
             #formContainer, #chartContainer, .no-print-col { display: none !important; }
             .main-container { padding: 0; }
             .modern-card { border: none; box-shadow: none; padding: 0; margin: 0; }
+            
+            /* Print style untuk dinas luar agar pas 1 halaman */
+            .page-a4 { margin: 0; box-shadow: none; border: none; }
+            .divider-dots { border-top: 1px dashed #eee; }
+            
             .bordered-table { width: 100%; margin-top: 20px; }
             .bordered-table th, .bordered-table td { border: 1px solid #000 !important; color: black !important; }
             #printTitle { display: block !important; text-align: center; margin-bottom: 20px; }
@@ -113,12 +150,16 @@
             <div class="menu-icon">📑</div>
             <h3 style="margin:0; color: var(--primary);">Laporan Jurnal Harian</h3>
         </div>
+        <div class="menu-card" onclick="bukaHalamanDinas()">
+            <div class="menu-icon">✉️</div>
+            <h3 style="margin:0; color: var(--primary);">Form Dinas Luar</h3>
+        </div>
     </div>
     <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b;">Logout</button>
 </div>
 
 <div id="mainContent" style="display:none;">
-    <div class="header">
+    <div class="header no-print">
         <div style="display:flex; align-items:center; gap:10px;">
             <button onclick="kembaliKeMenu()" class="btn-tool">🔙 Menu</button>
             <h2 id="pageTitle" style="margin:0; font-size: 18px; color: var(--primary);">PT. UNIMITRA</h2>
@@ -127,7 +168,7 @@
     </div>
 
     <div class="main-container">
-        <div id="uiMonitoring">
+        <div id="uiMonitoring" style="display:none;">
             <div id="printTitle">
                 <h2 style="margin:0;">PT. UNIMITRA KHARISMA</h2>
                 <p>LAPORAN DATA PENGIRIMAN VENDOR</p>
@@ -199,6 +240,57 @@
                 </div>
             </div>
         </div>
+
+        <div id="uiDinasLuar" style="display:none;">
+            <div class="no-print" style="text-align:center; margin-bottom:10px;">
+                <button class="btn" style="background:var(--primary); color:white; padding:12px 25px;" onclick="window.print()">🖨️ CETAK FORM DINAS (A4)</button>
+            </div>
+            
+            <div class="page-a4">
+                <div class="divider-dots"></div>
+                
+                <div class="form-section-dinas">
+                    <div class="dinas-company">PT. UNIMITRA KHARISMA</div>
+                    <h2>FORM DINAS LUAR</h2>
+                    <p style="font-size: 11pt;">Dengan ini kami mengajukan persetujuan perjalanan dinas luar :</p>
+                    <table class="dinas-table">
+                        <tr><td width="130">Nama</td><td width="20">:</td><td class="dots"></td></tr>
+                        <tr><td>Jabatan</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Departemen</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Hari, tanggal</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Tempat</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Keperluan</td><td>:</td><td class="dots"></td></tr>
+                    </table>
+                    <div class="location-area">Cileungsi, .............................................................</div>
+                    <div class="signature-row">
+                        <div class="sig-box">Diajukan oleh,<div class="sig-space"></div>( .................................. )</div>
+                        <div class="sig-box">Mengetahui,<div class="sig-space"></div>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+                        <div class="sig-box">Disetujui atasan Ybs,<div class="sig-space"></div>( .................................. )</div>
+                    </div>
+                </div>
+
+                <div class="form-section-dinas">
+                    <div class="dinas-company">PT. UNIMITRA KHARISMA</div>
+                    <h2>FORM DINAS LUAR</h2>
+                    <p style="font-size: 11pt;">Dengan ini kami mengajukan persetujuan perjalanan dinas luar :</p>
+                    <table class="dinas-table">
+                        <tr><td width="130">Nama</td><td width="20">:</td><td class="dots"></td></tr>
+                        <tr><td>Jabatan</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Departemen</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Hari, tanggal</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Tempat</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Keperluan</td><td>:</td><td class="dots"></td></tr>
+                    </table>
+                    <div class="location-area">Cileungsi, .............................................................</div>
+                    <div class="signature-row">
+                        <div class="sig-box">Diajukan oleh,<div class="sig-space"></div>( .................................. )</div>
+                        <div class="sig-box">Mengetahui,<div class="sig-space"></div>( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+                        <div class="sig-box">Disetujui atasan Ybs,<div class="sig-space"></div>( .................................. )</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -222,6 +314,8 @@
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("uiMonitoring").style.display = "block";
         document.getElementById("uiCommers").style.display = "none";
+        document.getElementById("uiDinasLuar").style.display = "none";
+        document.getElementById("pageTitle").innerText = "Data Vendor - UNIMITRA";
     }
 
     function bukaHalamanCommers() {
@@ -229,10 +323,26 @@
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("uiMonitoring").style.display = "none";
         document.getElementById("uiCommers").style.display = "block";
+        document.getElementById("uiDinasLuar").style.display = "none";
+        document.getElementById("pageTitle").innerText = "Jurnal Harian - UNIMITRA";
         renderJurnal();
     }
 
-    function kembaliKeMenu() { document.getElementById("mainContent").style.display = "none"; document.getElementById("menuSelection").style.display = "flex"; }
+    // FUNGSI BARU UNTUK DINAS LUAR
+    function bukaHalamanDinas() {
+        document.getElementById("menuSelection").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        document.getElementById("uiMonitoring").style.display = "none";
+        document.getElementById("uiCommers").style.display = "none";
+        document.getElementById("uiDinasLuar").style.display = "block";
+        document.getElementById("pageTitle").innerText = "Form Dinas Luar - UNIMITRA";
+    }
+
+    function kembaliKeMenu() { 
+        document.getElementById("mainContent").style.display = "none"; 
+        document.getElementById("menuSelection").style.display = "flex"; 
+    }
+
     function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal Login")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
     
@@ -349,7 +459,3 @@
 
 </body>
 </html>
-
-
-
-
