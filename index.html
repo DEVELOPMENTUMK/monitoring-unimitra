@@ -363,32 +363,39 @@
     setInterval(updateClock, 1000);
 
     // --- LOGIC JADWAL SHOLAT (API) ---
-    async function getPrayerTimes() {
-        try {
-            const response = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Bogor&country=Indonesia&method=11');
-            const data = await response.json();
-            const timings = data.data.timings;
-            const displayTimes = [
-                {name: 'Subuh', time: timings.Fajr},
-                {name: 'Dzuhur', time: timings.Dhuhr},
-                {name: 'Ashar', time: timings.Asr},
-                {name: 'Maghrib', time: timings.Maghrib},
-                {name: 'Isya', time: timings.Isha}
-            ];
+   async function getPrayerTimes() {
+    try {
+        const response = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Bogor&country=Indonesia&method=11');
+        const data = await response.json();
+        
+        // --- TAMBAHKAN BARIS INI UNTUK TANGGAL ---
+        const dateInfo = data.data.date;
+        document.getElementById('masehiDate').innerText = dateInfo.readable; // Contoh: 03 Feb 2026
+        document.getElementById('hijriDate').innerText = `${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year} H`;
+        // ----------------------------------------
 
-            let html = "";
-            displayTimes.forEach(pt => {
-                html += `
-                    <div class="prayer-item">
-                        <div class="prayer-name">${pt.name}</div>
-                        <div class="prayer-time">${pt.time}</div>
-                    </div>`;
-            });
-            document.getElementById('prayerTimes').innerHTML = html;
-        } catch (e) {
-            document.getElementById('prayerTimes').innerHTML = "Gagal memuat jadwal.";
-        }
+        const timings = data.data.timings;
+        const displayTimes = [
+            {name: 'Subuh', time: timings.Fajr},
+            {name: 'Dzuhur', time: timings.Dhuhr},
+            {name: 'Ashar', time: timings.Asr},
+            {name: 'Maghrib', time: timings.Maghrib},
+            {name: 'Isya', time: timings.Isha}
+        ];
+
+        let html = "";
+        displayTimes.forEach(pt => {
+            html += `
+                <div class="prayer-item">
+                    <div class="prayer-name">${pt.name}</div>
+                    <div class="prayer-time">${pt.time}</div>
+                </div>`;
+        });
+        document.getElementById('prayerTimes').innerHTML = html;
+    } catch (e) {
+        document.getElementById('prayerTimes').innerHTML = "Gagal memuat jadwal.";
     }
+}
 
     function bukaHalamanInput() {
         document.getElementById("menuSelection").style.display = "none";
@@ -540,5 +547,6 @@
 
 </body>
 </html>
+
 
 
