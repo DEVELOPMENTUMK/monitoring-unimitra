@@ -32,11 +32,10 @@
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; outline:none; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-        /* --- STYLE SUBMENU UPDATED --- */
         #menuSelection { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; }
         
-        /* Widget Sholat & Tanggal Container */
-        .prayer-container {
+        /* --- Widget Sholat & Tanggal --- */
+        .prayer-widget-wrapper {
             background: white;
             padding: 20px;
             border-radius: 20px;
@@ -59,12 +58,11 @@
             min-width: 80px;
             border: 1px solid #f1f5f9;
         }
-        .prayer-item.active { background: #dbeafe; border-color: var(--primary); }
         .prayer-name { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
         .prayer-time { font-size: 16px; font-weight: 700; color: var(--primary); }
 
-        /* Style Tanggal Baru */
-        .date-display {
+        /* Style Tanggal Baru di Bawah Jadwal */
+        .date-footer {
             margin-top: 15px;
             padding-top: 10px;
             border-top: 1px dashed #cbd5e1;
@@ -90,57 +88,38 @@
         .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .main-container { padding: 20px; max-width: 1300px; margin: auto; }
 
-        .modern-card { 
-            background: white; padding: 25px; border-radius: 16px; 
-            border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
+        /* Style Tabel & Form Monitoring */
+        .modern-card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         label { font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        input, textarea { 
-            padding: 11px; border: 1px solid #e2e8f0; border-radius: 8px; 
-            width: 100%; box-sizing: border-box; font-size: 13px; transition: 0.2s;
-            background: #f8fafc;
-        }
+        input, textarea { padding: 11px; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 13px; background: #f8fafc; }
         .btn { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .btn-save { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-pdf { background: #64748b; color: white; margin-left: 10px; }
         .btn-tool { background: white; border: 1px solid #e2e8f0; color: #475569; }
 
         .bordered-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-        .bordered-table th { 
-            background: #f8fafc; border: 1px solid var(--border-color); 
-            padding: 12px; text-align: center; font-size: 11px; color: #64748b; text-transform: uppercase;
-        }
+        .bordered-table th { background: #f8fafc; border: 1px solid var(--border-color); padding: 12px; font-size: 11px; color: #64748b; text-transform: uppercase; }
         .bordered-table td { border: 1px solid var(--border-color); padding: 10px 12px; font-size: 13px; text-align: center; }
         .row-text-red td { color: var(--danger) !important; font-weight: 600; }
 
+        /* Jurnal Harian (Asli) */
+        .jurnal-header { text-align: center; font-weight: 800; font-size: 1.4rem; margin-bottom: 5px; }
+        .profile-box { font-family: 'Courier New', Courier, monospace; font-weight: bold; margin-bottom: 20px; }
         .jurnal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
         .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; text-align: center; }
 
-        .page-a4 {
-            width: 210mm; height: 297mm; background: white;
-            display: flex; flex-direction: column; position: relative;
-            margin: 30px auto; box-shadow: 0 0 30px rgba(0,0,0,0.2);
-        }
-        .form-section-dinas {
-            height: 148.5mm; width: 100%; padding: 12mm 20mm;
-            box-sizing: border-box; display: flex; flex-direction: column;
-            position: relative; overflow: hidden;
-        }
+        /* Form Dinas (Asli Double) */
+        .page-a4 { width: 210mm; height: 297mm; background: white; display: flex; flex-direction: column; position: relative; margin: 30px auto; box-shadow: 0 0 30px rgba(0,0,0,0.2); }
+        .form-section-dinas { height: 148.5mm; width: 100%; padding: 12mm 20mm; box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .divider-dots { position: absolute; top: 148.5mm; left: 0; width: 100%; border-top: 1px dashed #bbb; z-index: 10; }
         .dots { border-bottom: 1px dotted #000; }
-        .signature-row {
-            margin-top: auto;
-            margin-bottom: 2mm;
-            display: flex;
-            justify-content: space-between;
-        }
+        .signature-row { margin-top: auto; margin-bottom: 2mm; display: flex; justify-content: space-between; }
         .sig-box { text-align: center; width: 32%; font-size: 10pt; }
         .sig-space { height: 65px; }
 
         @media print {
-            .header, #menuSelection, #loginOverlay, .no-print, .search-box, .btn-tool, .running-text-container { display: none !important; }
+            .header, #menuSelection, #loginOverlay, .no-print, .running-text-container { display: none !important; }
             .page-a4 { margin: 0; box-shadow: none; border: none; }
         }
     </style>
@@ -160,14 +139,14 @@
     <h2 style="margin-bottom: 5px; color: #1e293b;">PT.UNIMITRA KHARISMA</h2>
     <div id="digitalClock" style="font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 20px;">00:00:00</div>
 
-    <div class="prayer-container">
+    <div class="prayer-widget-wrapper">
         <div class="prayer-widget" id="prayerTimes">
             <div style="font-size: 12px; color: #64748b;">Memuat jadwal sholat...</div>
         </div>
-        <div class="date-display">
-            <span id="displayMasehi">-- --- ----</span> 
+        <div class="date-footer">
+            <span id="txtMasehi">-- --- ----</span> 
             <span style="margin: 0 10px; color: #cbd5e1;">|</span> 
-            <span id="displayHijriah" style="color: #b45309;">-- --- ---- H</span>
+            <span id="txtHijriah" style="color: #b45309;">-- --- ---- H</span>
         </div>
     </div>
 
@@ -238,26 +217,57 @@
 
         <div id="uiCommers" style="display:none;">
             <div class="modern-card">
-                <h2 style="text-align:center;">Laporan Jurnal Harian Kerja</h2>
+                <div class="jurnal-header">PT. UNIMITRA KHARISMA</div>
+                <h2 style="text-align:center; border-bottom: 2px solid #333; padding-bottom:10px; margin-bottom:20px;">Laporan Jurnal Harian Kerja</h2>
+                <div class="profile-box">
+                    <pre style="margin:0;">NAMA          : Arif Setiawan<br>NIK           : 2040412<br>DEPARTEMEN    : Development<br>JOBDESK       : GRAPHIC & FILM DRAFTER</pre>
+                </div>
                 <table class="jurnal-table">
                     <thead>
-                        <tr><th width="5%">NO</th><th width="15%">HARI</th><th width="20%">TGL</th><th width="55%">URAIAN</th><th class="no-print">AKSI</th></tr>
+                        <tr><th width="5%">NO</th><th width="15%">HARI</th><th width="20%">TGL/BLN/THN</th><th width="55%">URAIAN KEGIATAN</th><th width="5%" class="no-print">AKSI</th></tr>
                     </thead>
                     <tbody id="jurnalTableBody"></tbody>
                 </table>
-                <button class="btn btn-save" style="width:auto; margin-top:10px;" onclick="addRowJurnal()">+ Tambah Baris</button>
+                <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
+                    <button class="btn" style="background:var(--primary); color:white;" onclick="addRowJurnal()">+ Tambah Baris</button>
+                    <button class="btn" style="background:#64748b; color:white;" onclick="window.print()">Cetak / PDF</button>
+                </div>
             </div>
         </div>
 
         <div id="uiDinasLuar" style="display:none;">
+            <div class="no-print" style="text-align:center; margin-bottom:10px;">
+                <button class="btn" style="background:var(--primary); color:white; padding:12px 25px;" onclick="window.print()">🖨️ CETAK</button>
+            </div>
             <div class="page-a4">
+                <div class="divider-dots"></div>
                 <div class="form-section-dinas">
                     <div style="font-weight:bold;">PT. UNIMITRA KHARISMA</div>
-                    <h2 style="text-align:center; text-decoration:underline;">FORM DINAS LUAR</h2>
-                    <table style="width:100%; margin-top:20px;">
+                    <h2>FORM DINAS LUAR</h2>
+                    <table style="width:100%; margin-top:20px;" class="dinas-table">
                         <tr><td width="130">Nama</td><td width="20">:</td><td class="dots"></td></tr>
                         <tr><td>Jabatan</td><td>:</td><td class="dots"></td></tr>
                         <tr><td>Departemen</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Hari, tanggal</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Tempat</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Keperluan</td><td>:</td><td class="dots"></td></tr>
+                    </table>
+                    <div class="signature-row">
+                        <div class="sig-box">Diajukan oleh,<div class="sig-space"></div>( ..................... )</div>
+                        <div class="sig-box">Mengetahui,<div class="sig-space"></div>( ........ HRD ........ )</div>
+                        <div class="sig-box">Disetujui,<div class="sig-space"></div>( ..................... )</div>
+                    </div>
+                </div>
+                <div class="form-section-dinas">
+                    <div style="font-weight:bold;">PT. UNIMITRA KHARISMA</div>
+                    <h2>FORM DINAS LUAR</h2>
+                    <table style="width:100%; margin-top:20px;" class="dinas-table">
+                        <tr><td width="130">Nama</td><td width="20">:</td><td class="dots"></td></tr>
+                        <tr><td>Jabatan</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Departemen</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Hari, tanggal</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Tempat</td><td>:</td><td class="dots"></td></tr>
+                        <tr><td>Keperluan</td><td>:</td><td class="dots"></td></tr>
                     </table>
                     <div class="signature-row">
                         <div class="sig-box">Diajukan oleh,<div class="sig-space"></div>( ..................... )</div>
@@ -285,46 +295,47 @@
     const auth = firebase.auth();
     let chartInstance = null;
 
-    // Jam Digital
+    // Clock
     setInterval(() => {
         const now = new Date();
         document.getElementById('digitalClock').innerText = String(now.getHours()).padStart(2,'0')+":"+String(now.getMinutes()).padStart(2,'0')+":"+String(now.getSeconds()).padStart(2,'0');
     }, 1000);
 
-    // --- LOGIC JADWAL SHOLAT & TANGGAL (API) ---
+    // Prayer & Dates
     async function getPrayerTimes() {
         try {
             const response = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Bogor&country=Indonesia&method=11');
             const data = await response.json();
             const timings = data.data.timings;
-            const apiDate = data.data.date; // Data tanggal dari API
+            const date = data.data.date;
 
-            const displayTimes = [
-                {name: 'Subuh', time: timings.Fajr},
-                {name: 'Dzuhur', time: timings.Dhuhr},
-                {name: 'Ashar', time: timings.Asr},
-                {name: 'Maghrib', time: timings.Maghrib},
-                {name: 'Isya', time: timings.Isha}
+            const prayers = [
+                {n: 'Subuh', t: timings.Fajr}, {n: 'Dzuhur', t: timings.Dhuhr}, {n: 'Ashar', t: timings.Asr}, {n: 'Maghrib', t: timings.Maghrib}, {n: 'Isya', t: timings.Isha}
             ];
 
             let html = "";
-            displayTimes.forEach(pt => {
-                html += `<div class="prayer-item"><div class="prayer-name">${pt.name}</div><div class="prayer-time">${pt.time}</div></div>`;
+            prayers.forEach(p => {
+                html += `<div class="prayer-item"><div class="prayer-name">${p.n}</div><div class="prayer-time">${p.t}</div></div>`;
             });
             document.getElementById('prayerTimes').innerHTML = html;
-
-            // Render Tanggal Masehi & Hijriah
-            document.getElementById('displayMasehi').innerText = apiDate.readable;
-            document.getElementById('displayHijriah').innerText = apiDate.hijri.day + " " + apiDate.hijri.month.en + " " + apiDate.hijri.year + " H";
-
-        } catch (e) {
-            document.getElementById('prayerTimes').innerHTML = "Gagal memuat jadwal.";
-        }
+            document.getElementById('txtMasehi').innerText = date.readable;
+            document.getElementById('txtHijriah').innerText = date.hijri.day + " " + date.hijri.month.en + " " + date.hijri.year + " H";
+        } catch (e) { document.getElementById('prayerTimes').innerHTML = "Gagal memuat."; }
     }
 
-    // Auth & Navigation
-    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Login Gagal")); }
+    // Auth
+    function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById("loginOverlay").style.display="none";
+            document.getElementById("menuSelection").style.display="flex";
+            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
+            getPrayerTimes(); muatData();
+        }
+    });
+
+    // Navigation
     function bukaHalamanInput() { toggleUI("uiMonitoring", "Data Vendor"); }
     function bukaHalamanCommers() { toggleUI("uiCommers", "Jurnal Harian"); renderJurnal(); }
     function bukaHalamanDinas() { toggleUI("uiDinasLuar", "Form Dinas"); }
@@ -336,31 +347,21 @@
         document.getElementById("pageTitle").innerText = title + " - UNIMITRA";
     }
 
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById("loginOverlay").style.display="none";
-            document.getElementById("menuSelection").style.display="flex";
-            document.getElementById("userTag").innerText = "User: " + user.email.split('@')[0];
-            getPrayerTimes();
-            muatData();
-        }
-    });
-
     // Monitoring CRUD
     async function simpanData() {
         const id = document.getElementById("editId").value;
-        const payload = { model:model.value, desainer:desainer.value, vendor:vendor.value, season:season.value, tglKirim:tglKirim.value, keterangan:keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
-        id ? await db.collection("data_unimitra").doc(id).update(payload) : await db.collection("data_unimitra").add(payload);
+        const p = { model:model.value, desainer:desainer.value, vendor:vendor.value, season:season.value, tglKirim:tglKirim.value, keterangan:keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
+        id ? await db.collection("data_unimitra").doc(id).update(p) : await db.collection("data_unimitra").add(p);
         resetForm();
     }
     function resetForm() { document.getElementById("editId").value=""; model.value=""; desainer.value=""; vendor.value=""; season.value=""; keterangan.value=""; tglKirim.value=""; }
     function muatData() {
         db.collection("data_unimitra").orderBy("waktu", "desc").onSnapshot(snap => {
-            let html = ""; let counts = {};
+            let html = ""; let i = 1; let counts = {};
             snap.forEach(doc => {
                 let d = doc.data(); counts[d.vendor] = (counts[d.vendor] || 0) + 1;
-                html += `<tr><td>-</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td><td>${d.keterangan || ''}</td>
-                <td><button onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button></td></tr>`;
+                html += `<tr><td>${i++}</td><td>${d.model}</td><td>${d.desainer}</td><td>${d.season}</td><td>${d.vendor}</td><td>${d.tglKirim}</td><td>${d.keterangan || ''}</td>
+                <td class="no-print-col"><button onclick="db.collection('data_unimitra').doc('${doc.id}').delete()">Hapus</button></td></tr>`;
             });
             document.getElementById("tableBody").innerHTML = html;
             renderChart(counts);
@@ -372,12 +373,12 @@
         chartInstance = new Chart(ctx, { type:'bar', data: { labels: Object.keys(data), datasets: [{ data: Object.values(data), backgroundColor:'#2563eb' }] } });
     }
 
-    // Jurnal Logic
+    // Jurnal (Asli)
     let journals = JSON.parse(localStorage.getItem('umk_jurnal')) || [];
     function renderJurnal() {
         const b = document.getElementById('jurnalTableBody'); b.innerHTML = '';
         journals.forEach((item, i) => {
-            b.innerHTML += `<tr><td>${i+1}</td><td contenteditable="true" onblur="journals[${i}].hari=this.innerText;saveJ()">${item.hari}</td><td contenteditable="true" onblur="journals[${i}].tgl=this.innerText;saveJ()">${item.tgl}</td><td contenteditable="true" onblur="journals[${i}].uraian=this.innerText;saveJ()">${item.uraian}</td><td><button onclick="journals.splice(${i},1);renderJurnal()">X</button></td></tr>`;
+            b.innerHTML += `<tr><td>${i+1}</td><td contenteditable="true" onblur="journals[${i}].hari=this.innerText;saveJ()">${item.hari}</td><td contenteditable="true" onblur="journals[${i}].tgl=this.innerText;saveJ()">${item.tgl}</td><td contenteditable="true" onblur="journals[${i}].uraian=this.innerText;saveJ()">${item.uraian}</td><td class="no-print"><button onclick="journals.splice(${i},1);saveJ();renderJurnal()">X</button></td></tr>`;
         });
     }
     function addRowJurnal() { journals.push({hari:'', tgl:'', uraian:''}); renderJurnal(); }
