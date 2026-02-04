@@ -93,6 +93,26 @@
         .jurnal-table th { background: #334155; color: white; border: 1px solid #475569; text-align: center; padding: 12px; font-size: 13px; }
         .jurnal-table td { border: 1px solid #334155; padding: 12px; font-size: 13px; text-align: center; }
 
+        /* --- STYLES KHUSUS MASJID --- */
+        .masjid-main-card {
+            max-width: 1250px; margin: auto; background: white; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0;
+        }
+        .masjid-header {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+            padding: 25px; text-align: center; color: white;
+        }
+        .masjid-header h2 { margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+        .masjid-info-panel { display: flex; flex-direction: column; align-items: center; margin-top: 15px; }
+        .masjid-prayer-times { display: flex; gap: 6px; width: 100%; max-width: 600px; justify-content: center; }
+        .masjid-prayer-item { 
+            background: rgba(255, 255, 255, 0.12); padding: 8px 12px; border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15); flex: 1; text-align: center;
+        }
+        .masjid-prayer-item label { color: #a7f3d0; font-size: 9px; margin: 0; }
+        .masjid-prayer-item span { color: white; font-weight: 600; font-size: 14px; }
+
+        /* --- PRINT PRESISI --- */
         .page-a4 {
             width: 210mm; height: 297mm; background: white;
             display: flex; flex-direction: column; position: relative;
@@ -121,66 +141,19 @@
         .sig-box { text-align: center; width: 32%; font-size: 10pt; }
         .sig-space { height: 65px; }
 
-        /* --- KUNCI PRESISI PRINT UNTUK SEMUA HALAMAN --- */
         @media print {
-            @page { 
-                size: A4 portrait; 
-                margin: 10mm; /* Ruang aman agar tidak kepotong margin printer */
-            }
-            
+            @page { size: A4 portrait; margin: 10mm; }
             body { background: white; -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
-            
             .header, #menuSelection, #loginOverlay, .no-print, .search-box, 
             .btn-tool, #formContainer, #chartContainer, .no-print-col, 
             .running-text-container, #dateDisplay, .no-print-btn, #topSection { 
                 display: none !important; 
             }
-
             .main-container { padding: 0 !important; margin: 0 !important; width: 100% !important; }
             .modern-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
-
-            /* Presisi Tabel Vendor */
-            .bordered-table { 
-                display: table !important; 
-                width: 100% !important; 
-                table-layout: fixed !important; 
-                border-collapse: collapse !important;
-            }
-            .bordered-table th, .bordered-table td { 
-                border: 0.5pt solid black !important; 
-                padding: 6px 3px !important; 
-                font-size: 8.5pt !important; 
-                word-wrap: break-word !important;
-            }
-            /* Atur lebar kolom vendor saat print agar tidak meluap */
-            .bordered-table th:nth-child(1) { width: 30px; }
-            .bordered-table th:nth-child(2) { width: 80px; }
-            .bordered-table th:nth-child(3) { width: 80px; }
-            .bordered-table th:nth-child(4) { width: 60px; }
-            .bordered-table th:nth-child(5) { width: 80px; }
-            .bordered-table th:nth-child(6) { width: 80px; }
-
-            /* Presisi Jurnal Harian */
-            .jurnal-table { 
-                width: 100% !important; 
-                border-collapse: collapse !important; 
-                table-layout: fixed !important;
-            }
-            .jurnal-table th, .jurnal-table td { 
-                border: 0.5pt solid black !important; 
-                color: black !important; 
-                font-size: 9pt !important; 
-                padding: 8px 4px !important;
-            }
-
-            /* Presisi Form Dinas Luar (Gunakan margin 0 khusus dinas) */
-            .page-a4 {
-                margin: -10mm !important; /* Menetralkan margin @page untuk dinas */
-                box-shadow: none !important;
-                width: 210mm !important;
-                height: 297mm !important;
-            }
-
+            .bordered-table th, .bordered-table td { border: 0.5pt solid black !important; font-size: 8.5pt !important; }
+            .jurnal-table th, .jurnal-table td { border: 0.5pt solid black !important; font-size: 9pt !important; }
+            .page-a4 { margin: -10mm !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; }
             #printTitle { display: block !important; text-align: center; margin-bottom: 5mm; }
         }
 
@@ -223,13 +196,17 @@
             <div class="menu-icon">✉️</div>
             <h3 style="margin:0; color: var(--primary);">Form Dinas Luar</h3>
         </div>
+        <div class="menu-card" onclick="bukaHalamanMasjid()">
+            <div class="menu-icon">🕌</div>
+            <h3 style="margin:0; color: var(--success);">Masjid Unimitra</h3>
+        </div>
     </div>
     
     <button onclick="logout()" class="btn" style="margin-top: 40px; color: #64748b; background: transparent;">Logout System</button>
 
     <div class="running-text-container no-print">
         <marquee scrollamount="6">
-            ✨ PT. UNIMITRA KHARISMA: "Jagalah Sholatmu, Maka Allah Akan Menjaga Urusanmu." — Ayo Shola Berjamaah di Masjid PT.UNIMITRA KHARISMA. ✨
+            ✨ PT. UNIMITRA KHARISMA: "Jagalah Sholatmu, Maka Allah Akan Menjaga Urusanmu." — Ayo Sholat Berjamaah di Masjid PT.UNIMITRA KHARISMA. ✨
         </marquee>
     </div>
 </div>
@@ -354,6 +331,50 @@
                 </div>
             </div>
         </div>
+
+        <div id="uiMasjid" style="display:none;">
+            <div class="no-print" style="text-align:center; margin-bottom:10px;">
+                <button class="btn" style="background:var(--success); color:white; padding:12px 25px;" onclick="window.print()">🖨️ CETAK JADWAL KHATIB</button>
+            </div>
+            <div class="masjid-main-card">
+                <div class="masjid-header">
+                    <h2>MASJID AL-ITTIHAD PT. UNIMITRA KHARISMA</h2>
+                    <p>Jadwal Khatib & Imam Sholat Jumat</p>
+                    <div class="masjid-info-panel">
+                        <div class="masjid-prayer-times" id="masjidPrayerTimes">
+                            </div>
+                    </div>
+                </div>
+                <div style="padding: 25px;">
+                    <table class="bordered-table">
+                        <thead style="background: #f0fdf4;">
+                            <tr>
+                                <th width="20%">TANGGAL JUMAT</th>
+                                <th width="30%">KHATIB</th>
+                                <th width="30%">IMAM</th>
+                                <th width="20%">MUAZZIN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masjidTableBody">
+                            <tr>
+                                <td>06 Februari 2026</td>
+                                <td>Ust. Ahmad Fauzi</td>
+                                <td>Ust. Ahmad Fauzi</td>
+                                <td>Bpk. Ridwan</td>
+                            </tr>
+                            <tr>
+                                <td>13 Februari 2026</td>
+                                <td>Ust. Hamdan Sulaiman</td>
+                                <td>Ust. Hamdan Sulaiman</td>
+                                <td>Bpk. Ridwan</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="no-print" style="font-size: 11px; color: #64748b; margin-top: 15px;">* Jadwal dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya.</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -385,40 +406,63 @@
             const dateInfo = data.data.date;
             document.getElementById('masehiDate').innerText = dateInfo.readable;
             document.getElementById('hijriDate').innerText = `${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year} H`;
+            
             const timings = data.data.timings;
             const displayTimes = [
                 {name: 'Subuh', time: timings.Fajr}, {name: 'Dzuhur', time: timings.Dhuhr},
                 {name: 'Ashar', time: timings.Asr}, {name: 'Maghrib', time: timings.Maghrib},
                 {name: 'Isya', time: timings.Isha}
             ];
+
+            // Tampilan di Dashboard Utama
             let html = "";
+            // Tampilan di Menu Masjid
+            let masjidHtml = "";
+
             displayTimes.forEach(pt => {
                 html += `<div class="prayer-item"><div class="prayer-name">${pt.name}</div><div class="prayer-time">${pt.time}</div></div>`;
+                masjidHtml += `<div class="masjid-prayer-item"><label>${pt.name}</label><span>${pt.time}</span></div>`;
             });
+
             document.getElementById('prayerTimes').innerHTML = html;
-        } catch (e) { document.getElementById('prayerTimes').innerHTML = "Gagal memuat jadwal."; }
+            document.getElementById('masjidPrayerTimes').innerHTML = masjidHtml;
+        } catch (e) { 
+            document.getElementById('prayerTimes').innerHTML = "Gagal memuat jadwal."; 
+        }
     }
 
+    // FUNGSI NAVIGASI
     function bukaHalamanInput() { 
-        hideAll(); document.getElementById("uiMonitoring").style.display = "block"; document.getElementById("pageTitle").innerText = "Data Vendor";
+        hideAll(); document.getElementById("uiMonitoring").style.display = "block"; document.getElementById("pageTitle").innerText = "Data Vendor"; 
     }
     function bukaHalamanCommers() { 
-        hideAll(); document.getElementById("uiCommers").style.display = "block"; document.getElementById("pageTitle").innerText = "Jurnal Harian"; renderJurnal();
+        hideAll(); document.getElementById("uiCommers").style.display = "block"; document.getElementById("pageTitle").innerText = "Jurnal Harian"; renderJurnal(); 
     }
     function bukaHalamanDinas() { 
-        hideAll(); document.getElementById("uiDinasLuar").style.display = "block"; document.getElementById("pageTitle").innerText = "Form Dinas Luar";
+        hideAll(); document.getElementById("uiDinasLuar").style.display = "block"; document.getElementById("pageTitle").innerText = "Form Dinas Luar"; 
     }
+    function bukaHalamanMasjid() {
+        hideAll(); 
+        document.getElementById("uiMasjid").style.display = "block"; 
+        document.getElementById("pageTitle").innerText = "Masjid PT. Unimitra Kharisma";
+        document.getElementById("pageTitle").style.color = "var(--success)";
+    }
+
     function hideAll() {
         document.getElementById("menuSelection").style.display = "none";
         document.getElementById("mainContent").style.display = "block";
         document.getElementById("uiMonitoring").style.display = "none";
         document.getElementById("uiCommers").style.display = "none";
         document.getElementById("uiDinasLuar").style.display = "none";
+        document.getElementById("uiMasjid").style.display = "none";
+        document.getElementById("pageTitle").style.color = "var(--primary)";
     }
+
     function kembaliKeMenu() { 
         document.getElementById("mainContent").style.display = "none"; document.getElementById("menuSelection").style.display = "flex"; 
     }
 
+    // AUTH FUNCTIONS
     function login() { auth.signInWithEmailAndPassword(userInput.value.toLowerCase()+"@unimitra.com", passInput.value).catch(()=>alert("Gagal Login")); }
     function logout() { auth.signOut().then(()=>location.reload()); }
     
@@ -431,6 +475,7 @@
         }
     });
 
+    // VENDOR DATA FUNCTIONS
     async function simpanData() {
         const id = document.getElementById("editId").value;
         const data = { model:model.value, desainer:desainer.value, vendor:vendor.value, season:season.value, tglKirim:tglKirim.value, keterangan:keterangan.value, waktu: firebase.firestore.FieldValue.serverTimestamp() };
@@ -493,6 +538,7 @@
         });
     }
 
+    // JURNAL FUNCTIONS
     let journals = JSON.parse(localStorage.getItem('umk_jurnal')) || [{hari:'', tgl:'', uraian:''}];
     function renderJurnal() {
         const body = document.getElementById('jurnalTableBody'); body.innerHTML = '';
